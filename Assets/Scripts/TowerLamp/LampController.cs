@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class LampController : MonoBehaviour
 {
+    #region Variables
     [Tooltip("램프에 불이 들어오는 매터리얼이 반드시 첫번째 매터리얼이어야 합니다.")]
     public MeshRenderer lamp;           //램프 렌더러
 
@@ -13,31 +14,9 @@ public class LampController : MonoBehaviour
 
     private Material _lampMaterial;    //램프 매터리얼
     private bool _isOn = false;
+    #endregion
 
-    private void Awake()
-    {
-        //인스펙터에 lamp가 비어있으면
-        if (lamp == null)
-        {
-            //게임 오브젝트에 어태치되어 있는 매쉬렌더러를 찾아 넣어준다.
-            lamp = GetComponent<MeshRenderer>();
-        }
-
-        //램프를 찾은 상태라면
-        if (lamp != null)
-        {
-            //램프의 매터리얼을 _lampMaterial에 넣어준다.
-            _lampMaterial = lamp.materials[0];
-        }
-
-        if (string.IsNullOrEmpty(address))
-            Debug.LogWarning($"{gameObject.name} PLC에 할당될 어드레스 값이 비어있습니다.");
-
-        _isOn = _lampMaterial.IsKeywordEnabled("_EMISSION");
-
-        TurnOn = false;
-    }
-
+    #region Property
     //램프를 On/Off 시키는 함수
     public bool TurnOn
     {
@@ -64,5 +43,32 @@ public class LampController : MonoBehaviour
                 _lampMaterial.DisableKeyword("_EMISSION");
         }
     }
+    #endregion
+
+    #region Unity event method
+    private void Awake()
+    {
+        //인스펙터에 lamp가 비어있으면
+        if (lamp == null)
+        {
+            //게임 오브젝트에 어태치되어 있는 매쉬렌더러를 찾아 넣어준다.
+            lamp = GetComponent<MeshRenderer>();
+        }
+
+        //램프를 찾은 상태라면
+        if (lamp != null)
+        {
+            //램프의 매터리얼을 _lampMaterial에 넣어준다.
+            _lampMaterial = lamp.materials[0];
+        }
+
+        if (string.IsNullOrEmpty(address))
+            Debug.LogWarning($"{gameObject.name} PLC에 할당될 어드레스 값이 비어있습니다.");
+
+        _isOn = _lampMaterial.IsKeywordEnabled("_EMISSION");
+
+        TurnOn = false;
+    }
+    #endregion
 }
-        
+

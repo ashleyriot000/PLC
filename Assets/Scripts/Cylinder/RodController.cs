@@ -3,6 +3,7 @@ using UnityEngine.Events;
 
 public class RodController : MonoBehaviour
 {
+    #region Variables
     [Tooltip("연결하지 않을 시 게임오브젝트 안에 어태치되어 있는 리지드바디를 자동으로 가져옵니다.")]
     public Rigidbody rod;
     [Tooltip("연결하지 않을 시 게임오브젝트 안에 어태치되어 있는 리지드바디를 자동으로 가져옵니다.")]
@@ -18,8 +19,50 @@ public class RodController : MonoBehaviour
 
     private bool _isOnForward;      //전진 밸브 On/Off
     private bool _isOnReverse;      //후퇴 밸브 On/Off
-    private float _direction = 0f;
+    private float _direction = 0f;    //이동 방향(1: 전진, -1:후퇴)
+    #endregion
 
+    #region Property
+    //전진 밸브의 상태 변화에 대한 프로퍼티
+    public bool IsOnForward
+    {
+        get => _isOnForward;
+        set
+        {
+            //변화가 없으면 return
+            if (_isOnForward == value)
+                return;
+
+            //최신 상태로 갱신
+            _isOnForward = value;
+            //갱신상태를 등록된 함수들에게 알림.
+            onChangedForward?.Invoke(value);
+            //전후진 방향 재설정
+            _direction = SetDirection(_isOnForward, _isOnReverse);
+        }
+    }
+
+    //후퇴 밸브의 상태 변화에 대한 프로퍼티
+    public bool IsOnReverse
+    {
+        get => _isOnReverse;
+        set
+        {
+            //변화가 없으면 return
+            if (_isOnReverse == value)
+                return;
+
+            //최신 상태로 갱신
+            _isOnReverse = value;
+            //갱신 상태를 등록된 함수들에게 알림
+            onChangedReverse?.Invoke(value);
+            //전후진 방향 재설정
+            _direction = SetDirection(_isOnForward, _isOnReverse);
+        }
+    }
+    #endregion
+
+    #region Unity event method
     private void Awake()
     {
         //Rod가 비어 있으면 게임오브젝트에 어태치된 리지드바디 찾아서 넣기
@@ -72,7 +115,9 @@ public class RodController : MonoBehaviour
         //Z축을 기준으로 전진,후퇴방향으로 압력값만큼 밀어낸다.
         rod.AddRelativeForce(_direction * pressure * Vector3.forward);
     }
+    #endregion
 
+    #region Private method
     //방향 설정 함수
     private float SetDirection(bool isOnForward, bool isOnReverse)
     {
@@ -87,42 +132,6 @@ public class RodController : MonoBehaviour
         //모두 아니면 -1 반환
         return -1f;
     }
+    #endregion
 
-    //전진 밸브의 상태 변화에 대한 프로퍼티
-    public bool IsOnForward
-    {
-        get => _isOnForward;
-        set
-        {
-            //변화가 없으면 return
-            if (_isOnForward == value)
-                return;
-
-            //최신 상태로 갱신
-            _isOnForward = value;
-            //갱신상태를 등록된 함수들에게 알림.
-            onChangedForward?.Invoke(value);
-            //전후진 방향 재설정
-            _direction = SetDirection(_isOnForward, _isOnReverse);
-        }
-    }
-
-    //후퇴 밸브의 상태 변화에 대한 프로퍼티
-    public bool IsOnReverse
-    {
-        get => _isOnReverse;
-        set
-        {
-            //변화가 없으면 return
-            if (_isOnReverse == value)
-                return;
-
-            //최신 상태로 갱신
-            _isOnReverse = value;
-            //갱신 상태를 등록된 함수들에게 알림
-            onChangedReverse?.Invoke(value);
-            //전후진 방향 재설정
-            _direction = SetDirection(_isOnForward, _isOnReverse);
-        }
-    }
 }
