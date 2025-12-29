@@ -25,7 +25,9 @@ public class CrackDetector : MonoBehaviour
 
     public Transform scanner;
     public GameObject scanningEffect;
-    public Transform scanCamera;
+    public Camera scanCamera;
+    public Transform scanCameraTransform;
+    public RectTransform scanMask;
     public RectTransform scanImage;
     public float imageSize = 256f;
     public string MapName = "_BaseMap";
@@ -64,6 +66,7 @@ public class CrackDetector : MonoBehaviour
     private bool _hasFinalDetected = false;
     private bool[] _detectedLines;
     private Vector3[] _detectedPoints;
+    private Vector3 _scanImagePosition;
 
     private void Start()
     {
@@ -104,9 +107,11 @@ public class CrackDetector : MonoBehaviour
         };
 
 
-        scanCamera.localRotation = Quaternion.Euler(forwardDir);
-        scanCamera.localPosition = Vector3.Lerp(scanner.localPosition, scanner.localPosition + (count - 1) * interval *lineAxis + scanDir * scanDistance, 0.5f);
+        scanCameraTransform.localRotation = Quaternion.Euler(forwardDir);
+        scanCameraTransform.localPosition = Vector3.Lerp(scanner.localPosition, scanner.localPosition + (count - 1) * interval *lineAxis + scanDir * scanDistance, 0.5f);
         scanningEffect.SetActive(false);
+        _scanImagePosition = scanImage.position;
+        scanCamera.enabled = false;
     }
 
 #if UNITY_EDITOR
@@ -149,8 +154,8 @@ public class CrackDetector : MonoBehaviour
         };
 
 
-        scanCamera.localRotation = Quaternion.Euler(forwardDir);
-        scanCamera.localPosition = Vector3.Lerp(scanner.localPosition, scanner.localPosition + (count - 1) * interval * lineAxis + scanDir * scanDistance, 0.5f);
+        scanCameraTransform.localRotation = Quaternion.Euler(forwardDir);
+        scanCameraTransform.localPosition = Vector3.Lerp(scanner.localPosition, scanner.localPosition + (count - 1) * interval * lineAxis + scanDir * scanDistance, 0.5f);
     }
 #endif
 
@@ -192,15 +197,14 @@ public class CrackDetector : MonoBehaviour
                     continue;
                 }
 
-                Renderer render = hit.collider.GetComponent<Renderer>();
-                if (render == null)
+                if (!hit.collider.TryGetComponent<Renderer>(out var render))
                 {
                     _detectedLines[i] = false;
                     continue;
                 }
 
                 Texture2D texture = render.material.GetTexture(MapName) as Texture2D;
-                Debug.Log(texture);
+                
                 Vector2 rawUV = hit.textureCoord;
                 Vector2 tiling = render.material.GetTextureScale(MapName);
                 Vector2 offset = render.material.GetTextureOffset(MapName);
@@ -220,8 +224,8 @@ public class CrackDetector : MonoBehaviour
                 detected = true;
             }
             else
-            {
-                _detectedPoints[i] = scanner.position + forwardDir * detectableDistance;
+            {                
+                _detectedPoints[i] = ray.GetPoint(detectableDistance);
                 _detectedLines[i] = false;
                 continue;
             }
@@ -233,11 +237,13 @@ public class CrackDetector : MonoBehaviour
 
     private void Update()
     {
-        if(!_isScanning)
+        if (!_isScanning)
         {
             scanner.localPosition = Vector3.MoveTowards(scanner.localPosition, Vector3.zero, scanSpeed * Time.deltaTime);
+            scanCamera.enabled = false;
             return;
         }
+        
 
         Vector3 scanDir = scanDirection switch
         {
@@ -252,8 +258,10 @@ public class CrackDetector : MonoBehaviour
 
         Vector3 destination = scanDir * scanDistance;
         scanner.localPosition = Vector3.MoveTowards(scanner.localPosition, destination, scanSpeed * Time.deltaTime);
-        scanImage.anchoredPosition = Vector2.MoveTowards(scanImage.anchoredPosition, Vector2.zero, imageSize / scanDistance * scanSpeed * Time.deltaTime);
-        if(DetectCrack())
+        scanMask.anchoredPosition = Vector2.MoveTowards(scanMask.anchoredPosition, Vector2.zero, imageSize / scanDistance * scanSpeed * Time.deltaTime);
+        scanImage.position = _scanImagePosition;
+
+        if (DetectCrack())
         {
             _hasDetected = true;
             if(!needAllScan)
@@ -276,7 +284,9 @@ public class CrackDetector : MonoBehaviour
         HasDetected = false;
         _isScanning = true;
         scanningEffect.SetActive(true);
-        scanImage.anchoredPosition = Vector2.up * -imageSize;
+        scanMask.anchoredPosition = Vector2.up * imageSize;
+        scanImage.position = _scanImagePosition;
+        scanCamera.enabled = true;
     }
 
     private void ScanEnd(bool result)
