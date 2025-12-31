@@ -11089,6 +11089,56 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1717892050
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1717892052}
+  - component: {fileID: 1717892051}
+  m_Layer: 0
+  m_Name: MXComponent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1717892051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717892050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b400cddc4f2e914cb88a5d04629bdcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interval: 100
+  _capacity: 100
+  _stationNumber: 1
+  _password: 
+  _useAutoConnect: 1
+  _addressList: []
+--- !u!4 &1717892052
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717892050}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.06125398, y: 0.61981225, z: 0.2510372}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1744260891 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1393298862737690274, guid: 25bd5dfa054c2de4fbca918ef8549bb1, type: 3}
@@ -13708,6 +13758,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: address
+      value: Y22
+      objectReference: {fileID: 0}
+    - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: onChangedLamp.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 58412746}
@@ -13716,9 +13770,17 @@ PrefabInstance:
       value: KombiSIGN71
       objectReference: {fileID: 0}
     - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: address
+      value: Y21
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: onChangedLamp.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1862992398}
+    - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: address
+      value: Y20
+      objectReference: {fileID: 0}
     - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: onChangedLamp.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -14340,3 +14402,4 @@ SceneRoots:
   - {fileID: 1008752000}
   - {fileID: 2009264124}
   - {fileID: 1421908190}
+  - {fileID: 1717892052}
