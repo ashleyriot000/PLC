@@ -17,6 +17,7 @@ public class LampController : MonoBehaviour
     #endregion
 
     #region Property
+
     //램프를 On/Off 시키는 함수
     public bool TurnOn
     {
@@ -78,6 +79,12 @@ public class LampController : MonoBehaviour
 
     private void Start()
     {
+        if(string.IsNullOrEmpty(address))
+        {
+            Debug.LogWarning($"{gameObject.name} : 제발 좀 디바이스 주소 넣어줘");
+            return;
+        }
+
         MXRequester.Get.AddDeviceAddress(address, ChangedValue);
     }
     #endregion

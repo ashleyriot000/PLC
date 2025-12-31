@@ -1,3 +1,4 @@
+using System.Net;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -60,6 +61,17 @@ public class ACMotorController : MonoBehaviour
             _torqueDirection = SetRotationDirection(_isOnForward, _isOnReverse);
         }
     }
+
+    public void ChangedForward(short readValue)
+    {
+        IsOnForward = readValue == 0 ? false : true;
+    }
+
+    public void ChangedReverse(short readValue)
+    {
+        IsOnReverse  = readValue == 0 ? false : true;
+    }
+
     #endregion
 
     #region Unity Event Method
@@ -85,6 +97,18 @@ public class ACMotorController : MonoBehaviour
         
         //처음 시작시 모두 OFF로 설정
         IsOnForward = IsOnReverse = false;
+    }
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(forwardAddress) || string.IsNullOrEmpty(reverseAddress))
+        {
+            Debug.LogWarning($"{gameObject.name} : 제발 좀 디바이스 주소 넣어줘");
+            return;
+        }
+
+        MXRequester.Get.AddDeviceAddress(forwardAddress, ChangedForward);
+        MXRequester.Get.AddDeviceAddress(reverseAddress, ChangedReverse);
     }
 
     private void FixedUpdate()
