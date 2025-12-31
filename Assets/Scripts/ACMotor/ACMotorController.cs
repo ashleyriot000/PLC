@@ -12,6 +12,7 @@ public class ACMotorController : MonoBehaviour
     
     public float maxVelocity = 10f;     //초당 최대 회전 속도    
     public float torquePerSec = 1f;     //초당 토크
+    public float friction = 1f;
 
     public UnityEvent<bool> onChangedForward;
     public UnityEvent<bool> onChangedReverse;
@@ -88,6 +89,7 @@ public class ACMotorController : MonoBehaviour
         {
             //초당 최대 회전 속도를 적용한다.
             shaft.maxAngularVelocity = maxVelocity;
+            shaft.angularDamping = friction;
         }
 
         if(string.IsNullOrEmpty(forwardAddress) || string.IsNullOrEmpty(reverseAddress))

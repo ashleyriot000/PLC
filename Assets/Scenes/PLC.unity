@@ -743,31 +743,213 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: SetAnalogInputValue
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 453147529}
-        m_TargetAssemblyTypeName: FloatDisplayer, Assembly-CSharp
-        m_MethodName: OnChangedValue
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
+--- !u!1 &142816841
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 142816842}
+  - component: {fileID: 142816847}
+  - component: {fileID: 142816846}
+  - component: {fileID: 142816845}
+  - component: {fileID: 142816844}
+  - component: {fileID: 142816843}
+  m_Layer: 5
+  m_Name: Button_Motor_Stop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &142816842
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142816841}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 766640297}
+  m_Father: {fileID: 1991636977}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &142816843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142816841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462d488e2a38ecb4d873571069cc86a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  address: X2
+  needCallback: 0
+--- !u!114 &142816844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142816841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 2
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 142816843}
+          m_TargetAssemblyTypeName: MXInputModule, Assembly-CSharp
+          m_MethodName: OnChangeValue
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
+        - m_Target: {fileID: 1606671803}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Toggle, UnityEngine.UI
+          m_MethodName: set_isOn
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 1274680178}
+          m_TargetAssemblyTypeName: UnityEngine.UI.Toggle, UnityEngine.UI
+          m_MethodName: set_isOn
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 142816843}
+          m_TargetAssemblyTypeName: MXInputModule, Assembly-CSharp
+          m_MethodName: OnChangeValue
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+--- !u!114 &142816845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142816841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 142816846}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &142816846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142816841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0.48686838, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &142816847
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142816841}
+  m_CullTransparentMesh: 1
 --- !u!1 &153502362
 GameObject:
   m_ObjectHideFlags: 0
@@ -2484,19 +2666,7 @@ MonoBehaviour:
   m_Group: {fileID: 547727227}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: set_STR
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &450630890
 GameObject:
@@ -3321,19 +3491,7 @@ MonoBehaviour:
   m_Group: {fileID: 547727227}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: set_STF
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!224 &547727229
 RectTransform:
@@ -3549,31 +3707,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 569199619}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8574026168124865016}
-        m_TargetAssemblyTypeName: RodController, Assembly-CSharp
-        m_MethodName: set_IsOnForward
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 8574026168124865016}
-        m_TargetAssemblyTypeName: RodController, Assembly-CSharp
-        m_MethodName: set_IsOnReverse
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &569199619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4909,6 +5043,101 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 763363308}
   m_CullTransparentMesh: 1
+--- !u!1 &766640296
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 766640297}
+  - component: {fileID: 766640300}
+  - component: {fileID: 766640299}
+  - component: {fileID: 766640298}
+  m_Layer: 5
+  m_Name: Text (Legacy)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &766640297
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766640296}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 142816842}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &766640298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766640296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
+--- !u!114 &766640299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766640296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 30
+    m_FontStyle: 1
+    m_BestFit: 0
+    m_MinSize: 3
+    m_MaxSize: 60
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: "\uBAA8\uD130\n\uC815\uC9C0"
+--- !u!222 &766640300
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766640296}
+  m_CullTransparentMesh: 1
 --- !u!1 &768201182
 GameObject:
   m_ObjectHideFlags: 0
@@ -5295,19 +5524,7 @@ MonoBehaviour:
   m_Group: {fileID: 1978541869}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1710479957}
-        m_TargetAssemblyTypeName: ConveyorController, Assembly-CSharp
-        m_MethodName: set_IsOnReverse
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &845259087
 GameObject:
@@ -6353,31 +6570,7 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: SetTargetHz
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1195461183}
-        m_TargetAssemblyTypeName: FloatDisplayer, Assembly-CSharp
-        m_MethodName: OnChangedValue
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &974645366
 GameObject:
   m_ObjectHideFlags: 0
@@ -6905,19 +7098,7 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6090296601396093166}
-        m_TargetAssemblyTypeName: LampController, Assembly-CSharp
-        m_MethodName: set_TurnOn
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &1055383677
 GameObject:
@@ -8304,6 +8485,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1274680177}
   - component: {fileID: 1274680178}
+  - component: {fileID: 1274680179}
   m_Layer: 5
   m_Name: Toggle_Motor_Reverse
   m_TagString: Untagged
@@ -8379,9 +8561,9 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ACMotorController, Assembly-CSharp
-        m_MethodName: set_IsOnReverse
+      - m_Target: {fileID: 1274680179}
+        m_TargetAssemblyTypeName: MXInputModule, Assembly-CSharp
+        m_MethodName: OnChangeValue
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8392,6 +8574,20 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   m_IsOn: 0
+--- !u!114 &1274680179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274680176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462d488e2a38ecb4d873571069cc86a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  address: X1
+  needCallback: 0
 --- !u!1 &1283366380
 GameObject:
   m_ObjectHideFlags: 0
@@ -9245,19 +9441,7 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: set_RM
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &1559547815
 GameObject:
@@ -9871,6 +10055,7 @@ GameObject:
   - component: {fileID: 1606671802}
   - component: {fileID: 1606671803}
   - component: {fileID: 1606671804}
+  - component: {fileID: 1606671805}
   m_Layer: 5
   m_Name: Toggle_Motor_Forward
   m_TagString: Untagged
@@ -9946,9 +10131,9 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ACMotorController, Assembly-CSharp
-        m_MethodName: set_IsOnForward
+      - m_Target: {fileID: 1606671805}
+        m_TargetAssemblyTypeName: MXInputModule, Assembly-CSharp
+        m_MethodName: OnChangeValue
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9972,6 +10157,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AllowSwitchOff: 1
+--- !u!114 &1606671805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606671801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462d488e2a38ecb4d873571069cc86a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  address: X0
+  needCallback: 0
 --- !u!1 &1610338329
 GameObject:
   m_ObjectHideFlags: 0
@@ -10561,31 +10760,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1680401799}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8574026168124865016}
-        m_TargetAssemblyTypeName: RodController, Assembly-CSharp
-        m_MethodName: set_IsOnReverse
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 8574026168124865016}
-        m_TargetAssemblyTypeName: RodController, Assembly-CSharp
-        m_MethodName: set_IsOnForward
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1680401799
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12245,19 +12420,7 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: set_RL
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &1956114694
 GameObject:
@@ -12497,19 +12660,7 @@ MonoBehaviour:
   m_Group: {fileID: 1978541869}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1710479957}
-        m_TargetAssemblyTypeName: ConveyorController, Assembly-CSharp
-        m_MethodName: set_IsOnForward
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!224 &1978541871
 RectTransform:
@@ -12616,19 +12767,7 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8724952982740595554}
-        m_TargetAssemblyTypeName: InverterController, Assembly-CSharp
-        m_MethodName: set_RH
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &1991636976
 GameObject:
@@ -12668,6 +12807,7 @@ RectTransform:
   - {fileID: 1274680177}
   - {fileID: 1680401797}
   - {fileID: 1037992150}
+  - {fileID: 142816842}
   - {fileID: 1170912832}
   - {fileID: 195546707}
   - {fileID: 547727229}
@@ -12837,19 +12977,7 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8161581594122765420}
-        m_TargetAssemblyTypeName: LampController, Assembly-CSharp
-        m_MethodName: set_TurnOn
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &2009264121
 GameObject:
@@ -13014,19 +13142,7 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8148095310966464485}
-        m_TargetAssemblyTypeName: LampController, Assembly-CSharp
-        m_MethodName: set_TurnOn
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   m_IsOn: 0
 --- !u!1 &2025147203
 GameObject:
@@ -13310,6 +13426,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2057767294}
   m_CullTransparentMesh: 1
+--- !u!1 &2076153317 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3976559114615663863, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+  m_PrefabInstance: {fileID: 6944428486231361807}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2076153323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2076153317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462d488e2a38ecb4d873571069cc86a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  address: 
+  needCallback: 0
 --- !u!1 &2089605637
 GameObject:
   m_ObjectHideFlags: 0
@@ -13959,17 +14094,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a79153fbe6bdeb646b3e7e00d71734c9, type: 3}
---- !u!114 &6090296601396093166 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
-  m_PrefabInstance: {fileID: 4765930328928573792}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e40525626879404aa5ba59217ac65c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &6098553847971481761
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14040,12 +14164,36 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: detectableLayer.m_Bits
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.size
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1165367001}
+    - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 2076153323}
+    - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: OnChangeValue
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: MXInputModule, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3956204911949385802, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.48
@@ -14101,7 +14249,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3976559114615663863, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2076153323}
   m_SourcePrefab: {fileID: 100100000, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
 --- !u!1 &7067765140654084788 stripped
 GameObject:
@@ -14121,12 +14272,12 @@ PrefabInstance:
       value: 150-504-2014
       objectReference: {fileID: 0}
     - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
-      propertyPath: forwardAddress
-      value: Y23
+      propertyPath: maxVelocity
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
-      propertyPath: reverseAddress
-      value: Y24
+      propertyPath: torquePerSec
+      value: 3000
       objectReference: {fileID: 0}
     - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
       propertyPath: onChangedForward.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -14186,39 +14337,6 @@ Rigidbody:
   m_CorrespondingSourceObject: {fileID: 1342359112908533204, guid: a79153fbe6bdeb646b3e7e00d71734c9, type: 3}
   m_PrefabInstance: {fileID: 5573604150976189763}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8148095310966464485 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
-  m_PrefabInstance: {fileID: 4765930328928573792}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e40525626879404aa5ba59217ac65c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &8161581594122765420 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
-  m_PrefabInstance: {fileID: 4765930328928573792}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e40525626879404aa5ba59217ac65c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &8574026168124865016 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
-  m_PrefabInstance: {fileID: 6944428486231361807}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ece4def94aa0db74a9be2b28932b78a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8724952982740595554
 MonoBehaviour:
   m_ObjectHideFlags: 0

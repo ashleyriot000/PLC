@@ -22,7 +22,7 @@ public class RodController : MonoBehaviour
     private float _direction = 0f;    //이동 방향(1: 전진, -1:후퇴)
     #endregion
 
-    #region Property
+    #region  Property
     //전진 밸브의 상태 변화에 대한 프로퍼티
     public bool IsOnForward
     {
