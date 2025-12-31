@@ -60,6 +60,17 @@ public class RodController : MonoBehaviour
             _direction = SetDirection(_isOnForward, _isOnReverse);
         }
     }
+
+    public void ChangedForward(short readValue)
+    {
+        IsOnForward = readValue == 0 ? false : true;
+    }
+
+    public void ChangedReverse(short readValue)
+    {
+        IsOnReverse = readValue == 0 ? false : true;
+    }
+
     #endregion
 
     #region Unity event method
@@ -108,6 +119,18 @@ public class RodController : MonoBehaviour
 
         IsOnForward = false;
         IsOnReverse = false;
+    }
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(forwardAddress) || string.IsNullOrEmpty(reverseAddress))
+        {
+            Debug.LogWarning($"{gameObject.name} : 제발 좀 디바이스 주소 넣어줘");
+            return;
+        }
+
+        MXRequester.Get.AddDeviceAddress(forwardAddress, ChangedForward);
+        MXRequester.Get.AddDeviceAddress(reverseAddress, ChangedReverse);
     }
 
     private void FixedUpdate()
