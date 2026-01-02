@@ -10,6 +10,23 @@ public class InverterController : MonoBehaviour
     [Tooltip("\"모터 회전에 사용할 샤프트 컨피규러블조인트를 연결해 주세요. 연결하지 않을 시 \n게임오브젝트 안에 어태치되어 있는 컨피규러블조인트를 자동으로 가져옵니다.")]
     public ConfigurableJoint joint;
 
+    [Header("PLC 출력 디바이스")]
+    public string STFAddress;      //정회전
+    public string STRAddress;     //역회전
+    public string RHAddress;       //고단
+    public string RMAddress;       //중단
+    public string RLAddress;        //저단
+    public string MRSAddress;     //비상정지
+    public string RSTAddress;      //리셋
+    public string AnalogAddress;  //아날로그 신호
+
+    [Header("PLC 입력 디바이스")]
+    public string RUNAddress;       //운전중
+    public string SUAddress;        //속도 도달
+    public string ALERTAddress;     //고장 알람
+
+
+
     [Header("모터 기본 성능")]
     [Delayed]
     public int poleCount = 4;                   //극수(짝수로만 가능함)
@@ -42,8 +59,10 @@ public class InverterController : MonoBehaviour
     [SerializeField] float _currentHz = 0.0f;       //현재 주파수
     [SerializeField] float _currentRPM = 0.0f;     //현재 RPM
 
-    private bool _isRun = false;
-    private bool _isOnForward = false;      //정회전
+    private bool _isRun = false;                   //운전중인지
+    private bool _emergencyStop = false;    //긴급 정지중인지
+    private bool _isAlert = false;                  //고장 상태인지
+    private bool _isOnForward = false;         //정회전
     private bool _isOnReverse = false;      //역회전
     private bool _isOnLow = false;          //저속
     private bool _isOnMiddle = false;       //중속
@@ -51,11 +70,14 @@ public class InverterController : MonoBehaviour
 
     //인버터의 상태 변화에 대한 델리게이트
     public UnityEvent<bool> onChangedRun;
+    public UnityEvent<bool> onChangedEMS;
+    public UnityEvent<bool> onChangedAlert;
     public UnityEvent<bool> onChangedForward;
     public UnityEvent<bool> onChangedReverse;
     public UnityEvent<bool> onChangedRL;
     public UnityEvent<bool> onChangedRM;
     public UnityEvent<bool> onChangedRH;
+    public UnityEvent<bool> onReachedTargetHz;
     public UnityEvent<int> onChangedAnalog;
     public UnityEvent<float> onChangedTargetHz;
     public UnityEvent<float> onChangedCurrentHz;
@@ -83,12 +105,68 @@ public class InverterController : MonoBehaviour
             onChangedRun?.Invoke(value);
         }
     }
+
+    
+    public bool EMStop
+    {
+        get => _emergencyStop;
+        set
+        {
+            if (_emergencyStop == value) 
+                return;
+
+            
+            if(_emergencyStop = value)
+            {
+                STF = false;
+                STR = false;
+            }
+
+            onChangedEMS?.Invoke(value);
+        }
+    }
+
+    public bool IsAlert
+    {
+        get => _isAlert;
+        set
+        {
+            if (_isAlert == value)
+                return;
+
+            if(_isAlert = value)
+            {
+                STF = false;
+                STR = false;
+            }
+
+            onChangedAlert?.Invoke(value);
+        }
+    }
+
+    private bool _reachTargetHz = false;
+    public bool ReachTargetHz
+    {
+        get => _reachTargetHz;
+        private set
+        {
+            if (_reachTargetHz == value)
+                return;
+
+            _reachTargetHz = value;
+            onReachedTargetHz?.Invoke(value);
+        }
+    }
+
     //정방향 회전 상태 변화에 대한 프로퍼티
     public bool STF
     {
         get => _isOnForward;
         set
         {
+            if (IsAlert || EMStop)
+                return;
+
             //변경되지 않았으면 return
             if (_isOnForward == value)
                 return;
@@ -113,6 +191,9 @@ public class InverterController : MonoBehaviour
         
         set
         {
+            if (EMStop || IsAlert)
+                return;
+
             //변화가 없으면 return
             if (_isOnReverse == value)
                 return;
@@ -136,6 +217,9 @@ public class InverterController : MonoBehaviour
 
         set
         {
+            if (IsAlert || EMStop)
+                return;
+
             //다단 속도를 사용하지 않는다면 return
             if (!useStep)
                 return;
@@ -158,6 +242,9 @@ public class InverterController : MonoBehaviour
         get => _isOnMiddle;
         set
         {
+            if (IsAlert || EMStop)
+                return;
+
             //다단 속도를 사용하지 않는다면 return
             if (!useStep)
                 return;
@@ -180,6 +267,9 @@ public class InverterController : MonoBehaviour
         get => _isOnHigh;
         set
         {
+            if (IsAlert || EMStop)
+                return;
+
             //다단 속도를 사용하지 않는다면 return
             if (!useStep)
                 return;
@@ -202,13 +292,23 @@ public class InverterController : MonoBehaviour
         get => _analogInputValue;
         set
         {
+            if (IsAlert || EMStop)
+                return;
+
             //아날로그 입력을 사용하지 않는다면 return
             if (!useAnalogInput)
                 return;
+
             //아날로그 입력값이 동일하면 return
             if (_analogInputValue == value)
                 return;
 
+            if (_analogInputValue > analogMaxResolution)
+            {
+                IsAlert = true;
+                return;
+            }
+            
             //아날로그 입력값을 최신 상태로 갱신
             _analogInputValue = value;
             //갱신된 아날로그 값을 등록된 함수들에게 알림
@@ -230,7 +330,7 @@ public class InverterController : MonoBehaviour
         {
             //최신 상태로 갱신후 등록된 함수들에게 알림
             _currentHz = value;
-            onChangedCurrentHz?.Invoke(Mathf.Abs(value));
+            onChangedCurrentHz?.Invoke(Mathf.Abs(value));            
         }
     }
 
@@ -246,6 +346,46 @@ public class InverterController : MonoBehaviour
             onChangedCurrentRPM?.Invoke(Mathf.Abs(value));
         }
     }
+
+    public void ReceiveSTFSignal(short readValue)
+    {
+        STF = readValue == 0 ? false : true;
+    }
+    public void ReceiveSTRSignal(short readValue)
+    {
+        STR = readValue == 0 ? false : true; 
+    }
+    public void ReceiveRHSignal(short readValue)
+    {
+        RH = readValue == 0 ? false : true;
+    }
+    public void ReceiveRMSignal(short readValue)
+    {
+        RM = readValue == 0 ? false : true;
+    }
+    public void ReceiveRLSignal(short readValue)
+    {
+        RL = readValue == 0 ? false : true;
+    }
+    public void ReceiveEMSSignal(short readValue)
+    {
+        EMStop = readValue == 0 ? false : true;
+    }
+
+    public void ReceiveResetSignal(short readValue)
+    {
+        if(readValue != 0)
+        {
+            IsAlert = false;
+        }
+    }
+
+    public void ReceiveAnalogSignal(short readValue)
+    {
+        AnalogInput = readValue;
+    }
+
+  
     #endregion
 
     #region Unity Event Method
@@ -288,7 +428,18 @@ public class InverterController : MonoBehaviour
             //z축 회전만 자유롭게 설정
             joint.angularZMotion = ConfigurableJointMotion.Free;
         }
+    }
 
+    private void Start()
+    {
+        MXRequester.Get.AddDeviceAddress(STFAddress, ReceiveSTFSignal);
+        MXRequester.Get.AddDeviceAddress(STRAddress, ReceiveSTRSignal);
+        MXRequester.Get.AddDeviceAddress(RHAddress, ReceiveRHSignal);
+        MXRequester.Get.AddDeviceAddress(RMAddress, ReceiveRMSignal);
+        MXRequester.Get.AddDeviceAddress(RLAddress, ReceiveRLSignal);
+        MXRequester.Get.AddDeviceAddress(MRSAddress, ReceiveEMSSignal);
+        MXRequester.Get.AddDeviceAddress(RSTAddress, ReceiveResetSignal);
+        MXRequester.Get.AddDeviceAddress(AnalogAddress, ReceiveAnalogSignal);        
     }
 
     private void FixedUpdate()
@@ -327,8 +478,7 @@ public class InverterController : MonoBehaviour
 
 
         if(hzStep > 0)
-        {
-            
+        {  
             return direction * stepFrequencies[hzStep];
         }
 
@@ -338,6 +488,12 @@ public class InverterController : MonoBehaviour
     {
         float rampRate = maxFrequency / (targetHz != 0 ? accelTime : decelTime);
         CurrentHz = Mathf.MoveTowards(_currentHz, targetHz, rampRate * Time.fixedDeltaTime);
+        if(Mathf.Abs(targetHz - CurrentHz) < float.Epsilon)
+        {
+            if(IsRun)
+                ReachTargetHz = true;
+        }
+
         CurrentRPM = (_currentHz / maxFrequency) * maxRPM;
 
         return _currentRPM * 0.10472f;
