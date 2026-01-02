@@ -14963,7 +14963,7 @@ MonoBehaviour:
   RLAddress: Y2D
   MRSAddress: Y2E
   RSTAddress: Y2F
-  AnalogAddress: U2\G1
+  AnalogAddress: U4\G1
   RUNAddress: X5
   SUAddress: X6
   ALERTAddress: X7
