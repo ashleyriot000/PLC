@@ -69,6 +69,16 @@ public class ConveyorController : MonoBehaviour
         }
     }
 
+    public void ChangedForward(short readValue)
+    {
+        IsOnForward = readValue == 0 ? false : true;
+    }
+
+    public void ChangedReverse(short readValue)
+    {
+        IsOnReverse = readValue == 0 ? false : true;
+    }
+
     #endregion
 
     #region Unity event method
@@ -80,6 +90,18 @@ public class ConveyorController : MonoBehaviour
         //컨베이어 벨트가 비어 있다면 찾아서 넣어라.
         if(belt == null)
             belt = GetComponent<ConveyorBelt>();
+    }
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(forwardAddress) || string.IsNullOrEmpty(reverseAddress))
+        {
+            Debug.LogWarning($"{gameObject.name} : 제발 좀 디바이스 주소 넣어줘");
+            return;
+        }
+
+        MXRequester.Get.AddDeviceAddress(forwardAddress, ChangedForward);
+        MXRequester.Get.AddDeviceAddress(reverseAddress, ChangedReverse);
     }
 
     private void FixedUpdate()
