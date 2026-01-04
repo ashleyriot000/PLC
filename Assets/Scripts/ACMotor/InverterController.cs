@@ -434,10 +434,16 @@ public class InverterController : MonoBehaviour
     private float GetFinalTargetHz()
     {
         //운전신호가 없으면 정지        
-        if (EStop || IsAlert || !STF && !STR)
+        if (EStop || IsAlert)
         {
             IsRun = false;
 
+            return 0f;
+        }
+
+        if(!STF && !STR)
+        {
+            IsRun = false;
             return 0f;
         }
 
@@ -466,6 +472,8 @@ public class InverterController : MonoBehaviour
         {
             if (IsRun)
                 ReachTargetHz = true;
+            else
+                ReachTargetHz = false;
         }
         else
         {
