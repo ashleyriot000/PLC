@@ -103,11 +103,12 @@ public class InverterController : MonoBehaviour
             _isRun = value;
             //갱신된 상태를 등록된 함수들에게 알림
             onChangedRun?.Invoke(value);
+            MXRequester.Get.AddSetDeviceRequest(RUNAddress, (short)(value ? 1 : 0));
         }
     }
 
     
-    public bool EMStop
+    public bool EStop
     {
         get => _emergencyStop;
         set
@@ -115,13 +116,7 @@ public class InverterController : MonoBehaviour
             if (_emergencyStop == value) 
                 return;
 
-            
-            if(_emergencyStop = value)
-            {
-                STF = false;
-                STR = false;
-            }
-
+            _emergencyStop = value;
             onChangedEMS?.Invoke(value);
         }
     }
@@ -134,13 +129,10 @@ public class InverterController : MonoBehaviour
             if (_isAlert == value)
                 return;
 
-            if(_isAlert = value)
-            {
-                STF = false;
-                STR = false;
-            }
-
+            Debug.Log(value);
+            _isAlert = value;
             onChangedAlert?.Invoke(value);
+            MXRequester.Get.AddSetDeviceRequest(ALERTAddress, (short)(value ? 1 : 0));
         }
     }
 
@@ -155,6 +147,7 @@ public class InverterController : MonoBehaviour
 
             _reachTargetHz = value;
             onReachedTargetHz?.Invoke(value);
+            MXRequester.Get.AddSetDeviceRequest(SUAddress, (short)(value ? 1 : 0));
         }
     }
 
@@ -164,9 +157,6 @@ public class InverterController : MonoBehaviour
         get => _isOnForward;
         set
         {
-            if (IsAlert || EMStop)
-                return;
-
             //변경되지 않았으면 return
             if (_isOnForward == value)
                 return;
@@ -191,9 +181,6 @@ public class InverterController : MonoBehaviour
         
         set
         {
-            if (EMStop || IsAlert)
-                return;
-
             //변화가 없으면 return
             if (_isOnReverse == value)
                 return;
@@ -217,9 +204,6 @@ public class InverterController : MonoBehaviour
 
         set
         {
-            if (IsAlert || EMStop)
-                return;
-
             //다단 속도를 사용하지 않는다면 return
             if (!useStep)
                 return;
@@ -242,9 +226,6 @@ public class InverterController : MonoBehaviour
         get => _isOnMiddle;
         set
         {
-            if (IsAlert || EMStop)
-                return;
-
             //다단 속도를 사용하지 않는다면 return
             if (!useStep)
                 return;
@@ -267,9 +248,6 @@ public class InverterController : MonoBehaviour
         get => _isOnHigh;
         set
         {
-            if (IsAlert || EMStop)
-                return;
-
             //다단 속도를 사용하지 않는다면 return
             if (!useStep)
                 return;
@@ -292,9 +270,6 @@ public class InverterController : MonoBehaviour
         get => _analogInputValue;
         set
         {
-            if (IsAlert || EMStop)
-                return;
-
             //아날로그 입력을 사용하지 않는다면 return
             if (!useAnalogInput)
                 return;
@@ -303,14 +278,16 @@ public class InverterController : MonoBehaviour
             if (_analogInputValue == value)
                 return;
 
+            //아날로그 입력값을 최신 상태로 갱신
+            _analogInputValue = value;
+            
+            //잘못된 값이 들어올 경우 에러 발생
             if (_analogInputValue > analogMaxResolution)
             {
                 IsAlert = true;
                 return;
             }
             
-            //아날로그 입력값을 최신 상태로 갱신
-            _analogInputValue = value;
             //갱신된 아날로그 값을 등록된 함수들에게 알림
             onChangedAnalog?.Invoke(value);
 
@@ -369,7 +346,7 @@ public class InverterController : MonoBehaviour
     }
     public void ReceiveEMSSignal(short readValue)
     {
-        EMStop = readValue == 0 ? false : true;
+        EStop = readValue == 0 ? false : true;
     }
 
     public void ReceiveResetSignal(short readValue)
@@ -383,9 +360,7 @@ public class InverterController : MonoBehaviour
     public void ReceiveAnalogSignal(short readValue)
     {
         AnalogInput = readValue;
-    }
-
-  
+    }  
     #endregion
 
     #region Unity Event Method
@@ -444,8 +419,7 @@ public class InverterController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float finalTargetHz = GetFinalTargetHz();
-        shaft.angularVelocity = -transform.forward * CalculateCurrentSpeed(finalTargetHz);
+        shaft.angularVelocity = -transform.forward * CalculateCurrentSpeed(GetFinalTargetHz());
     }
 
 #if UNITY_EDITOR
@@ -459,8 +433,8 @@ public class InverterController : MonoBehaviour
     #region Private Method
     private float GetFinalTargetHz()
     {
-        //운전신호가 없으면 정지
-        if (!STF && !STR)
+        //운전신호가 없으면 정지        
+        if (EStop || IsAlert || !STF && !STR)
         {
             IsRun = false;
 
@@ -488,10 +462,14 @@ public class InverterController : MonoBehaviour
     {
         float rampRate = maxFrequency / (targetHz != 0 ? accelTime : decelTime);
         CurrentHz = Mathf.MoveTowards(_currentHz, targetHz, rampRate * Time.fixedDeltaTime);
-        if(Mathf.Abs(targetHz - CurrentHz) < float.Epsilon)
+        if (Mathf.Abs(targetHz - _currentHz) < float.Epsilon)
         {
-            if(IsRun)
+            if (IsRun)
                 ReachTargetHz = true;
+        }
+        else
+        {
+            ReachTargetHz = false;
         }
 
         CurrentRPM = (_currentHz / maxFrequency) * maxRPM;

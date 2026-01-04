@@ -472,8 +472,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rod: {fileID: 0}
   joint: {fileID: 0}
-  forwardAddress: 
-  reverseAddress: 
+  forwardAddress: Y23
+  reverseAddress: Y24
   pressure: 0.5
   onChangedForward:
     m_PersistentCalls:
@@ -494,6 +494,7 @@ GameObject:
   - component: {fileID: 8728820740259179782}
   - component: {fileID: 5751587044770954836}
   - component: {fileID: 2837372734895063044}
+  - component: {fileID: 1976856331749527187}
   m_Layer: 0
   m_Name: ForwardSensor
   m_TagString: Untagged
@@ -623,6 +624,32 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1976856331749527187}
+        m_TargetAssemblyTypeName: MXInputModule, Assembly-CSharp
+        m_MethodName: OnChangeValue
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1976856331749527187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976559114615663863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462d488e2a38ecb4d873571069cc86a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  address: X0
+  needCallback: 0
 --- !u!1 &5192871744633856304
 GameObject:
   m_ObjectHideFlags: 0
@@ -636,6 +663,7 @@ GameObject:
   - component: {fileID: 2713656517220035820}
   - component: {fileID: 5387364507291349199}
   - component: {fileID: 7127893540067260400}
+  - component: {fileID: 1748250820864792508}
   m_Layer: 0
   m_Name: ReverseSensor
   m_TagString: Untagged
@@ -765,6 +793,32 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1748250820864792508}
+        m_TargetAssemblyTypeName: MXInputModule, Assembly-CSharp
+        m_MethodName: OnChangeValue
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1748250820864792508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5192871744633856304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462d488e2a38ecb4d873571069cc86a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  address: X1
+  needCallback: 0
 --- !u!1 &5463514513495350627
 GameObject:
   m_ObjectHideFlags: 0
