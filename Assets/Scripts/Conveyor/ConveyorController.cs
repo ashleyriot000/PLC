@@ -3,6 +3,7 @@ using realvirtual;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
+[RequireComponent(typeof (ConveyorBelt)), RequireComponent(typeof(BoxCollider))]
 public class ConveyorController : MonoBehaviour
 {
     #region Variables
@@ -159,4 +160,19 @@ public class ConveyorController : MonoBehaviour
 
         _targetSpeed = speed;
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        BoxCollider box = GetComponent<BoxCollider>();
+        ConveyorBelt belt = GetComponent<ConveyorBelt>();
+        Vector3 size = box.size;
+        size.x = belt.width;
+        size.y = belt.height;
+        size.z = belt.length;
+        box.size = size;
+        box.center = Vector3.up * 0.03f;
+        box.isTrigger = true;
+    }
+#endif 
 }

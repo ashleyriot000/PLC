@@ -1,4 +1,3 @@
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,21 +9,16 @@ public class InverterController : MonoBehaviour
     [Tooltip("\"모터 회전에 사용할 샤프트 컨피규러블조인트를 연결해 주세요. 연결하지 않을 시 \n게임오브젝트 안에 어태치되어 있는 컨피규러블조인트를 자동으로 가져옵니다.")]
     public ConfigurableJoint joint;
 
-    [Header("PLC 출력 디바이스")]
+    [Header("필수 출력 디바이스 주소")]
     public string STFAddress;      //정회전
     public string STRAddress;     //역회전
-    public string RHAddress;       //고단
-    public string RMAddress;       //중단
-    public string RLAddress;        //저단
     public string MRSAddress;     //비상정지
     public string RSTAddress;      //리셋
-    public string AnalogAddress;  //아날로그 신호
 
-    [Header("PLC 입력 디바이스")]
-    public string RUNAddress;       //운전중
-    public string SUAddress;        //속도 도달
-    public string ALERTAddress;     //고장 알람
-
+    [Header("필수 입력 디바이스 주소")]
+    public string RUNAddress;     //운전중인지 알림
+    public string SUAddress;       //목표 속도 도달 알림
+    public string ALERTAddress;  //고장 알림
 
 
     [Header("모터 기본 성능")]
@@ -40,8 +34,12 @@ public class InverterController : MonoBehaviour
     public float decelTime = 1.0f;              //감속시간(Max -> 0까지 도달하는데 걸리는 시간
 
     [Header("다단 속도 설정")]
-    public bool useStep = false;                //단단 속도 제어. true로 할 경우 인버터 직접 제어함수가 작동하지 않게 바뀜
+    public bool useStep = false;                //단단 속도 제어. true로 변경하면 인버터 직접 제어는 우선순위에서 밀림.
                                                             //SetTargetHz, IncreaseTargetHz, DecreaseTargetHz
+    public string RHAddress;       //고단
+    public string RMAddress;       //중단
+    public string RLAddress;        //저단
+
     public float[] stepFrequencies = new float[8]
     {
         0f, 10f, 30f, 0f, 60f, 0f, 0f, 0f
@@ -50,6 +48,7 @@ public class InverterController : MonoBehaviour
     [Header("아날로그 입력 설정")]
     public bool useAnalogInput = false;       //아날로그 신호로 제어. true로 할 경우 인버터 직접 제어함수가 작동하지 않게 바뀜
                                                               //SetTargetHz, IncreaseTargetHz, DecreaseTargetHz
+    public string AnalogAddress;  //아날로그 신호
     public int analogMaxResolution = 4000; //분해능(미쯔비시 : 4000, LS : 16000)
 
     [Header("상태 모니터링")]
@@ -59,34 +58,35 @@ public class InverterController : MonoBehaviour
     [SerializeField] float _currentHz = 0.0f;       //현재 주파수
     [SerializeField] float _currentRPM = 0.0f;     //현재 RPM
 
-    private bool _isRun = false;                   //운전중인지
-    private bool _emergencyStop = false;    //긴급 정지중인지
-    private bool _isAlert = false;                  //고장 상태인지
-    private bool _isOnForward = false;         //정회전
-    private bool _isOnReverse = false;      //역회전
-    private bool _isOnLow = false;          //저속
-    private bool _isOnMiddle = false;       //중속
-    private bool _isOnHigh = false;         //고속
+    private bool _isRun = false;                     //운전중인지
+    private bool _emergencyStop = false;      //긴급 정지중인지
+    private bool _isAlert = false;                    //고장 상태인지
+    private bool _isOnForward = false;           //정회전
+    private bool _isOnReverse = false;           //역회전
+    private bool _isOnLow = false;                 //저속
+    private bool _isOnMiddle = false;             //중속
+    private bool _isOnHigh = false;                //고속
+    private bool _reachTargetHz = false;        //목표 속도에 도달했는지 여부
 
     //인버터의 상태 변화에 대한 델리게이트
-    public UnityEvent<bool> onChangedRun;
-    public UnityEvent<bool> onChangedEMS;
-    public UnityEvent<bool> onChangedAlert;
-    public UnityEvent<bool> onChangedForward;
-    public UnityEvent<bool> onChangedReverse;
-    public UnityEvent<bool> onChangedRL;
-    public UnityEvent<bool> onChangedRM;
-    public UnityEvent<bool> onChangedRH;
-    public UnityEvent<bool> onReachedTargetHz;
-    public UnityEvent<int> onChangedAnalog;
-    public UnityEvent<float> onChangedTargetHz;
-    public UnityEvent<float> onChangedCurrentHz;
-    public UnityEvent<float> onChangedCurrentRPM;
+    public UnityEvent<bool> onChangedRun;               //운전 상태 변화에 대한 델리게이트
+    public UnityEvent<bool> onChangedEMS;               //긴급정지 상태 변화에 대한 델리게이트
+    public UnityEvent<bool> onChangedAlert;              //고장 상태 알림에 대한 델리게이트
+    public UnityEvent<bool> onChangedForward;         //정회전 신호 변화에 대한 델리게이트
+    public UnityEvent<bool> onChangedReverse;         //역회전 신호 변화에 대한 델리게이트
+    public UnityEvent<bool> onChangedRL;                 //저단 신호 변화에 대한 델리게이트
+    public UnityEvent<bool> onChangedRM;                //중단 신호 변화에 대한 델리게이트
+    public UnityEvent<bool> onChangedRH;                //고단 신호 변화에 대한 델리게이트
+    public UnityEvent<bool> onReachedTargetHz;        //목표 속도에 도달여부에 대한 델리게이트
+    public UnityEvent<int> onChangedAnalog;             //아날로그 신호의 변화에 대한 델리게이트
+    public UnityEvent<float> onChangedTargetHz;       //목표 주파수 변화에 대한 델리게이트(유니티 내부 제어용)
+    public UnityEvent<float> onChangedCurrentHz;     //현재 주파수 변화에 대한 델리게이트
+    public UnityEvent<float> onChangedCurrentRPM;   //현재 RPM 변화에 대한 델리게이트
     #endregion
 
     #region Property
-    public float GetCurrentHz => _currentHz;
-    public float GetCurrentRPM => _currentRPM;
+    public float GetCurrentHz => _currentHz;            //현재 주파수 값 가져오기
+    public float GetCurrentRPM => _currentRPM;       //현재 RPM 값 가져오기
 
     //모터의 운전 상태 변화(On/Off)에 대한 프로퍼티
     public bool IsRun
@@ -103,50 +103,84 @@ public class InverterController : MonoBehaviour
             _isRun = value;
             //갱신된 상태를 등록된 함수들에게 알림
             onChangedRun?.Invoke(value);
+
+            if( string.IsNullOrEmpty(RUNAddress))
+            {
+                Debug.LogWarning("입력 디바이스 주소가 비어있어 보낼 수 없습니다. 주소를 채워주세요");
+                return;
+            }
+
+            //PLC에 변경된 상태정보를 보냄
             MXRequester.Get.AddSetDeviceRequest(RUNAddress, (short)(value ? 1 : 0));
         }
     }
 
-    
+    //긴급 정지 상태 변화에 대한 프로퍼티
     public bool EStop
     {
         get => _emergencyStop;
         set
         {
+            //값이 동일하면 return
             if (_emergencyStop == value) 
                 return;
 
+            //최신 상태로 갱신
             _emergencyStop = value;
+            //갱신된 상태를 등록된 콜백함수들에게 알림
             onChangedEMS?.Invoke(value);
         }
     }
 
+    //모터 고장 상태에 대한 프로퍼티
     public bool IsAlert
     {
         get => _isAlert;
-        set
+        //고장은 내부에서만 판단해 수정할 수 있음.
+        private set
         {
+            //동일한 값이면 Return
             if (_isAlert == value)
                 return;
 
-            Debug.Log(value);
+            //최신 상태로 갱신
             _isAlert = value;
+            //갱신된 상태를 등록된 콜백함수들에게 알림
             onChangedAlert?.Invoke(value);
+
+            if (string.IsNullOrEmpty(ALERTAddress))
+            {
+                Debug.LogWarning("입력 디바이스 주소가 비어있어 보낼 수 없습니다. 주소를 채워주세요");
+                return;
+            }
+
+            //PLC에 변경된 고장 상태를 보냄
             MXRequester.Get.AddSetDeviceRequest(ALERTAddress, (short)(value ? 1 : 0));
         }
     }
 
-    private bool _reachTargetHz = false;
+    //목표 속도 도달 여부에 대한 프로퍼티
     public bool ReachTargetHz
     {
         get => _reachTargetHz;
+        //내부에서만 판단해 수정할 수 있음.
         private set
         {
+            //동일한 상태면 Return
             if (_reachTargetHz == value)
                 return;
 
+            //최신 상태로 갱신
             _reachTargetHz = value;
+            //등록된 콜백함수들에게 최신 상태를 알림.
             onReachedTargetHz?.Invoke(value);
+            if(string.IsNullOrEmpty(SUAddress))
+            {
+                Debug.LogWarning("입력 디바이스 주소가 비어있어 보낼 수 없습니다. 주소를 채워주세요");
+                return;
+            }
+
+            //PLC에 변경된 최신 상태 정보는 보냄
             MXRequester.Get.AddSetDeviceRequest(SUAddress, (short)(value ? 1 : 0));
         }
     }
@@ -323,32 +357,38 @@ public class InverterController : MonoBehaviour
             onChangedCurrentRPM?.Invoke(Mathf.Abs(value));
         }
     }
-
+    //PLC로부터 받는 콜백함수들
+    //정회전 신호 콜백
     public void ReceiveSTFSignal(short readValue)
     {
         STF = readValue == 0 ? false : true;
     }
+    //역회전 신호 콜백
     public void ReceiveSTRSignal(short readValue)
     {
         STR = readValue == 0 ? false : true; 
     }
+    //고단 신호 콜백
     public void ReceiveRHSignal(short readValue)
     {
         RH = readValue == 0 ? false : true;
     }
+    //중단 신호 콜백
     public void ReceiveRMSignal(short readValue)
     {
         RM = readValue == 0 ? false : true;
     }
+    //저단 신호 콜백
     public void ReceiveRLSignal(short readValue)
     {
         RL = readValue == 0 ? false : true;
     }
+    //긴급정지 신호 콜백
     public void ReceiveEMSSignal(short readValue)
     {
         EStop = readValue == 0 ? false : true;
     }
-
+    //리셋 신호 콜백
     public void ReceiveResetSignal(short readValue)
     {
         if(readValue != 0)
@@ -356,7 +396,7 @@ public class InverterController : MonoBehaviour
             IsAlert = false;
         }
     }
-
+    //아날로그 신호 콜백
     public void ReceiveAnalogSignal(short readValue)
     {
         AnalogInput = readValue;
@@ -407,14 +447,57 @@ public class InverterController : MonoBehaviour
 
     private void Start()
     {
-        MXRequester.Get.AddDeviceAddress(STFAddress, ReceiveSTFSignal);
-        MXRequester.Get.AddDeviceAddress(STRAddress, ReceiveSTRSignal);
-        MXRequester.Get.AddDeviceAddress(RHAddress, ReceiveRHSignal);
-        MXRequester.Get.AddDeviceAddress(RMAddress, ReceiveRMSignal);
-        MXRequester.Get.AddDeviceAddress(RLAddress, ReceiveRLSignal);
-        MXRequester.Get.AddDeviceAddress(MRSAddress, ReceiveEMSSignal);
-        MXRequester.Get.AddDeviceAddress(RSTAddress, ReceiveResetSignal);
-        MXRequester.Get.AddDeviceAddress(AnalogAddress, ReceiveAnalogSignal);        
+        if( string.IsNullOrEmpty(STFAddress) ||
+            string.IsNullOrEmpty(STRAddress) ||
+            string.IsNullOrEmpty(MRSAddress) ||
+            string.IsNullOrEmpty(RSTAddress))
+        {
+            Debug.LogWarning("필수 출력 디바이스 주소가 비어있습니다. 반드시 모두 입력해주세요.");
+        }
+        else
+        {
+            MXRequester.Get.AddDeviceAddress(STFAddress, ReceiveSTFSignal);
+            MXRequester.Get.AddDeviceAddress(STRAddress, ReceiveSTRSignal);
+            MXRequester.Get.AddDeviceAddress(MRSAddress, ReceiveEMSSignal);
+            MXRequester.Get.AddDeviceAddress(RSTAddress, ReceiveResetSignal);
+        }
+        
+        if( string.IsNullOrEmpty(RUNAddress) ||
+            string.IsNullOrEmpty(SUAddress) || 
+            string.IsNullOrEmpty(ALERTAddress))
+        {
+            Debug.LogWarning("필수 입력 디바이스 주소가 비어있습니다. 반드시 모두 입력해주세요.");
+        }
+
+        if(useStep)
+        {
+            if( string.IsNullOrEmpty(RHAddress) ||
+                string.IsNullOrEmpty(RMAddress) ||
+                string.IsNullOrEmpty(RLAddress))
+            {
+                Debug.LogWarning("다단 속도 제어 기능을 사용하시려면 해당 출력 디바이스 주소를 모두 채워야 합니다. \n" +
+                    "해당 디바이스 주소들을모두 입력해주세요.");
+            }
+            else
+            {
+                MXRequester.Get.AddDeviceAddress(RHAddress, ReceiveRHSignal);
+                MXRequester.Get.AddDeviceAddress(RMAddress, ReceiveRMSignal);
+                MXRequester.Get.AddDeviceAddress(RLAddress, ReceiveRLSignal);
+            }  
+        }
+
+        if(useAnalogInput)
+        {
+            if( string.IsNullOrEmpty(AnalogAddress))
+            {
+                Debug.LogWarning("아날로그 속도 제어 기능을 사용하시려면 해당 출력 디바이스 주소를 채워야 합니다. \n" +
+                    "해당 디바이스 주소를 입력해주세요.");
+            }
+            else
+            {
+                MXRequester.Get.AddDeviceAddress(AnalogAddress, ReceiveAnalogSignal);        
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -423,9 +506,10 @@ public class InverterController : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    //인스펙터에서 설정값을 수정하면 호출됨
     private void OnValidate()
     {
-        maxRPM = 120f * maxFrequency / 4f;
+        maxRPM = 120f * maxFrequency / poleCount;
     }
 #endif
 #endregion
@@ -468,7 +552,7 @@ public class InverterController : MonoBehaviour
     {
         float rampRate = maxFrequency / (targetHz != 0 ? accelTime : decelTime);
         CurrentHz = Mathf.MoveTowards(_currentHz, targetHz, rampRate * Time.fixedDeltaTime);
-        if (Mathf.Abs(targetHz - _currentHz) < float.Epsilon)
+        if (Mathf.Abs(targetHz - _currentHz) < 0.0001f)
         {
             if (IsRun)
                 ReachTargetHz = true;
@@ -544,6 +628,7 @@ public class InverterController : MonoBehaviour
         _targetHz = Mathf.Clamp(_targetHz - decrease, 0f, maxFrequency);
         onChangedTargetHz?.Invoke(_targetHz);
     }
+    
     public void SetAnalogInputValue(float value)
     {
         AnalogInput = (int)value;
