@@ -2,6 +2,7 @@ using UnityEngine;
 using realvirtual;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using System;
 
 [RequireComponent(typeof (ConveyorBelt)), RequireComponent(typeof(BoxCollider))]
 public class ConveyorController : MonoBehaviour
@@ -95,14 +96,11 @@ public class ConveyorController : MonoBehaviour
 
     private void Start()
     {
-        if (string.IsNullOrEmpty(forwardAddress) || string.IsNullOrEmpty(reverseAddress))
-        {
-            Debug.LogWarning($"{gameObject.name} : 제발 좀 디바이스 주소 넣어줘");
-            return;
-        }
+        if (!string.IsNullOrEmpty(forwardAddress))
+            MXRequester.Get.AddDeviceAddress(forwardAddress, ChangedForward);
 
-        MXRequester.Get.AddDeviceAddress(forwardAddress, ChangedForward);
-        MXRequester.Get.AddDeviceAddress(reverseAddress, ChangedReverse);
+        if(!string.IsNullOrEmpty(reverseAddress))
+            MXRequester.Get.AddDeviceAddress(reverseAddress, ChangedReverse);
     }
 
     private void FixedUpdate()

@@ -10,10 +10,17 @@ public class ProductManager : MonoBehaviour
     //디바이스 주소
     public string address;
 
+    private short prevValue = 0;
+
     public void Produce(short readValue)
     {
+        if (prevValue == readValue)
+            return;
+
         if(readValue > 0)
             Instantiate(products[Random.Range(0, products.Length)], producePosition.position, producePosition.rotation);
+
+        prevValue = readValue;
     }
 
     private void Start()
