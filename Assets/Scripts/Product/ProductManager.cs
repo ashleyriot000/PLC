@@ -17,6 +17,9 @@ public class ProductManager : MonoBehaviour
         if (prevValue == readValue)
             return;
 
+        if (products.Length == 0)
+            return;
+
         if(readValue > 0)
             Instantiate(products[Random.Range(0, products.Length)], producePosition.position, producePosition.rotation);
 
