@@ -556,7 +556,7 @@ public class ServoActuator : MonoBehaviour
                 }
                 break;
             case ActuatorState.Homing_Creep:
-                targetVelocity = -homingCreepSpeed;
+                targetVelocity = homingCreepSpeed * defaultHomingDirection;
 
                 //도그를 밟으면 기본 원점 복귀 방향으로 저속 이동해서 원점을 찾는다.
                 if(!isOnProximityDOG && _homingHitDog)
@@ -613,7 +613,7 @@ public class ServoActuator : MonoBehaviour
         
         //위치 적분
         _internalTarget_Unit += _currentVelocity_Unit * Time.fixedDeltaTime;
-        //물리적인 위치로 보내기        
+        //물리적인 위치로 보내기
         ApplyPhysics(_internalTarget_Unit);
 
         currentPos_Unit = _internalTarget_Unit;
