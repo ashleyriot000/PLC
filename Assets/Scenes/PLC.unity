@@ -16669,7 +16669,7 @@ GameObject:
   - component: {fileID: 6714102401570568098}
   - component: {fileID: 8847813801633186664}
   m_Layer: 0
-  m_Name: PHMC120-U-1200-S40B-L-S1(515M)
+  m_Name: PHMC120-S-50-S40-L-W
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17154,19 +17154,24 @@ MonoBehaviour:
   joint: {fileID: 0}
   actuatorType: 0
   usedUnit: 0
-  useForceStop: 0
   motorResolution: 131072
-  gearRatio: 1
   ballscrewLead: 10
-  maxSpeed: 500
+  gearRatio: 1
+  speedLimit: 2000
   accelTime: 100
   decelTime: 100
+  inPosWidth: 0.1
+  jogSpeedLimit: 200
+  jogAccelTime: 500
+  jogdecelTime: 500
+  useForceStop: 0
+  inPositionDuration: 100
   defaultHomingDirection: 1
-  jogSpeed: 100
   homingHighSpeed: 200
   homingCreepSpeed: 20
-  inPosWidth: 0.1
-  inPositionDuration: 0.1
+  homingAccelTime: 1
+  homingDecelTime: 1
+  positioningList: []
   onReadyChanged:
     m_PersistentCalls:
       m_Calls: []
