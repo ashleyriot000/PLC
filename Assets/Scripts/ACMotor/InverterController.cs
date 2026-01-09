@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class InverterController : MonoBehaviour
+public class InverterController : MXObject
 {
     #region Variables
     [Tooltip("\"모터 회전에 사용할 샤프트 리지드바디를 연결해 주세요. 연결하지 않을 시 \n게임오브젝트 안에 어태치되어 있는 리지드바디를 자동으로 가져옵니다.")]
@@ -10,16 +10,15 @@ public class InverterController : MonoBehaviour
     public ConfigurableJoint joint;
 
     [Header("필수 출력 디바이스 주소")]
-    public string STFAddress;      //정회전
-    public string STRAddress;     //역회전
-    public string MRSAddress;     //비상정지
-    public string RSTAddress;      //리셋
+    public DeviceAddress STF_Address = new DeviceAddress("정회전 신호");
+    public DeviceAddress STR_Address = new DeviceAddress("역회전 신호");
+    public DeviceAddress MRS_Address = new DeviceAddress("비상정지 신호");
+    public DeviceAddress RST_Address = new DeviceAddress("리셋 신호");
 
-    [Header("필수 입력 디바이스 주소")]
-    public string RUNAddress;     //운전중인지 알림
-    public string SUAddress;       //목표 속도 도달 알림
-    public string ALERTAddress;  //고장 알림
-
+    [Header("필수 입력 디바이스 주소")]    
+    public DeviceAddress RUN_Address = new DeviceAddress("운행중 피드백 신호");       //운전중인지 알림
+    public DeviceAddress SU_Address = new DeviceAddress("목표Hz 도달 신호");         //목표 속도 도달 알림
+    public DeviceAddress ALERT_Address = new DeviceAddress("고장 신호");    //고장 알림
 
     [Header("모터 기본 성능")]
     [Delayed]
@@ -36,9 +35,10 @@ public class InverterController : MonoBehaviour
     [Header("다단 속도 설정")]
     public bool useStep = false;                //단단 속도 제어. true로 변경하면 인버터 직접 제어는 우선순위에서 밀림.
                                                             //SetTargetHz, IncreaseTargetHz, DecreaseTargetHz
-    public string RHAddress;       //고단
-    public string RMAddress;       //중단
-    public string RLAddress;        //저단
+    public DeviceAddress RH_Address = new DeviceAddress("고단 속도 명령 신호");        //고단
+    public DeviceAddress RM_Address = new DeviceAddress("중단 속도 명령 신호");        //중단
+    public DeviceAddress RL_Address = new DeviceAddress("저단 속도 명령 신호");         //저단
+
 
     public float[] stepFrequencies = new float[8]
     {
@@ -104,14 +104,17 @@ public class InverterController : MonoBehaviour
             //갱신된 상태를 등록된 함수들에게 알림
             onChangedRun?.Invoke(value);
 
-            if( string.IsNullOrEmpty(RUNAddress))
+            if (!RUN_Address.useDevice)
+                return;
+
+            if(string.IsNullOrEmpty(RUN_Address.address))
             {
                 Debug.LogWarning("입력 디바이스 주소가 비어있어 보낼 수 없습니다. 주소를 채워주세요");
                 return;
             }
 
             //PLC에 변경된 상태정보를 보냄
-            MXRequester.Get.AddSetDeviceRequest(RUNAddress, (short)(value ? 1 : 0));
+            MXRequester.Get.AddSetDeviceRequest(RUN_Address.address, (short)(value ? 1 : 0));
         }
     }
 
@@ -148,14 +151,17 @@ public class InverterController : MonoBehaviour
             //갱신된 상태를 등록된 콜백함수들에게 알림
             onChangedAlert?.Invoke(value);
 
-            if (string.IsNullOrEmpty(ALERTAddress))
+            if (!ALERT_Address.useDevice)
+                return;
+
+            if (string.IsNullOrEmpty(ALERT_Address.address))
             {
                 Debug.LogWarning("입력 디바이스 주소가 비어있어 보낼 수 없습니다. 주소를 채워주세요");
                 return;
             }
 
             //PLC에 변경된 고장 상태를 보냄
-            MXRequester.Get.AddSetDeviceRequest(ALERTAddress, (short)(value ? 1 : 0));
+            MXRequester.Get.AddSetDeviceRequest(ALERT_Address.address, (short)(value ? 1 : 0));
         }
     }
 
@@ -174,14 +180,17 @@ public class InverterController : MonoBehaviour
             _reachTargetHz = value;
             //등록된 콜백함수들에게 최신 상태를 알림.
             onReachedTargetHz?.Invoke(value);
-            if(string.IsNullOrEmpty(SUAddress))
+
+            if (!SU_Address.useDevice)
+                return;
+            if(string.IsNullOrEmpty(SU_Address.address))
             {
                 Debug.LogWarning("입력 디바이스 주소가 비어있어 보낼 수 없습니다. 주소를 채워주세요");
                 return;
             }
 
             //PLC에 변경된 최신 상태 정보는 보냄
-            MXRequester.Get.AddSetDeviceRequest(SUAddress, (short)(value ? 1 : 0));
+            MXRequester.Get.AddSetDeviceRequest(SU_Address.address, (short)(value ? 1 : 0));
         }
     }
 
@@ -447,43 +456,23 @@ public class InverterController : MonoBehaviour
 
     private void Start()
     {
-        if( string.IsNullOrEmpty(STFAddress) ||
-            string.IsNullOrEmpty(STRAddress) ||
-            string.IsNullOrEmpty(MRSAddress) ||
-            string.IsNullOrEmpty(RSTAddress))
-        {
-            Debug.LogWarning("필수 출력 디바이스 주소가 비어있습니다. 반드시 모두 입력해주세요.");
-        }
-        else
-        {
-            MXRequester.Get.AddDeviceAddress(STFAddress, ReceiveSTFSignal);
-            MXRequester.Get.AddDeviceAddress(STRAddress, ReceiveSTRSignal);
-            MXRequester.Get.AddDeviceAddress(MRSAddress, ReceiveEMSSignal);
-            MXRequester.Get.AddDeviceAddress(RSTAddress, ReceiveResetSignal);
-        }
+        if(STF_Address.useDevice && string.IsNullOrEmpty(STF_Address.address))
+            MXRequester.Get.AddDeviceAddress(STF_Address.address, ReceiveSTFSignal);
+        if(STR_Address.useDevice && string.IsNullOrEmpty(STR_Address.address))
+            MXRequester.Get.AddDeviceAddress(STR_Address.address, ReceiveSTRSignal);
+        if(MRS_Address.useDevice && string.IsNullOrEmpty(MRS_Address.address))
+            MXRequester.Get.AddDeviceAddress(MRS_Address.address, ReceiveEMSSignal);
+        if (RST_Address.useDevice && string.IsNullOrEmpty(RST_Address.address))
+            MXRequester.Get.AddDeviceAddress(RST_Address.address, ReceiveResetSignal);
         
-        if( string.IsNullOrEmpty(RUNAddress) ||
-            string.IsNullOrEmpty(SUAddress) || 
-            string.IsNullOrEmpty(ALERTAddress))
-        {
-            Debug.LogWarning("필수 입력 디바이스 주소가 비어있습니다. 반드시 모두 입력해주세요.");
-        }
-
         if(useStep)
         {
-            if( string.IsNullOrEmpty(RHAddress) ||
-                string.IsNullOrEmpty(RMAddress) ||
-                string.IsNullOrEmpty(RLAddress))
-            {
-                Debug.LogWarning("다단 속도 제어 기능을 사용하시려면 해당 출력 디바이스 주소를 모두 채워야 합니다. \n" +
-                    "해당 디바이스 주소들을모두 입력해주세요.");
-            }
-            else
-            {
-                MXRequester.Get.AddDeviceAddress(RHAddress, ReceiveRHSignal);
-                MXRequester.Get.AddDeviceAddress(RMAddress, ReceiveRMSignal);
-                MXRequester.Get.AddDeviceAddress(RLAddress, ReceiveRLSignal);
-            }  
+            if(RH_Address.useDevice && string.IsNullOrEmpty(RH_Address.address))
+                MXRequester.Get.AddDeviceAddress(RH_Address.address, ReceiveRHSignal);
+            if(RM_Address.useDevice && string.IsNullOrEmpty(RM_Address.address))
+                MXRequester.Get.AddDeviceAddress(RM_Address.address, ReceiveRMSignal);
+            if(RL_Address.useDevice && string.IsNullOrEmpty(RL_Address.address))
+                MXRequester.Get.AddDeviceAddress(RL_Address.address, ReceiveRLSignal);
         }
 
         if(useAnalogInput)

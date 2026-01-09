@@ -49,7 +49,7 @@ public sealed class MXInterface : IDisposable
     }
 
     private readonly StringBuilder _sb = new();
-    private readonly Thread _worker;
+    private Thread _worker;
     private readonly AutoResetEvent _resetEvent = new(false);
     private ActUtlType64 _communicator;
 
@@ -70,11 +70,8 @@ public sealed class MXInterface : IDisposable
         _interval = interval;
         _stationNumber = stationNumber;
         _password = password;
-        _autoReadDatas = new short[capacity];
-        Thread thread = new(Run);
-        _worker = thread;
-        _worker.IsBackground = true;
-        _worker.SetApartmentState(ApartmentState.STA);
+        _autoReadDatas = new short[capacity];        
+        
     }
     ~MXInterface()
     {
@@ -84,11 +81,22 @@ public sealed class MXInterface : IDisposable
 
     public void Open()
     {
+        if (_worker != null)
+            return;
+
+        Thread thread = new(Run);
+        _worker = thread;
+        _worker.IsBackground = true;
+        _worker.SetApartmentState(ApartmentState.STA);
         _worker.Start();
     }
     public void Close()
     {
+        if (_worker == null)
+            return;
+
         _isRunning = false;
+        _worker = null;
         _resetEvent.Set();
     }
     public void Dispose()

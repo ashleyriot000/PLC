@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class RodController : MonoBehaviour
+public class RodController : MXObject
 {
     #region Variables
     [Tooltip("연결하지 않을 시 게임오브젝트 안에 어태치되어 있는 리지드바디를 자동으로 가져옵니다.")]
@@ -11,6 +11,8 @@ public class RodController : MonoBehaviour
 
     public string forwardAddress;
     public string reverseAddress;
+    public DeviceAddress forward_Address = new ("전진 솔레노이드 밸브 신호");
+    public DeviceAddress reverse_Address = new ("후퇴 솔레노이드 밸브 신호");
     
     public float pressure = 10f;            //피스톤 압력
 
