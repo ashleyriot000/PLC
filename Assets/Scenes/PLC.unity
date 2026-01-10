@@ -901,8 +901,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 0
-    description: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: 
     address: 
+    description: 
     comment: 
   needCallback: 0
 --- !u!114 &142816844
@@ -4838,8 +4841,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 0
-    description: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: 
     address: 
+    description: 
     comment: 
   needCallback: 0
 --- !u!114 &657955850
@@ -6103,8 +6109,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 0
-    description: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: 
     address: 
+    description: 
     comment: 
   needCallback: 0
 --- !u!114 &832909014
@@ -9591,8 +9600,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 0
-    description: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: 
     address: 
+    description: 
     comment: 
   needCallback: 0
 --- !u!1 &1283366380
@@ -11377,8 +11389,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 0
-    description: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: 
     address: 
+    description: 
     comment: 
   needCallback: 0
 --- !u!1 &1610338329
@@ -12466,8 +12481,23 @@ MonoBehaviour:
     m_Bits: 1
   movableTag: 
   movableName: Cube
-  forwardAddress: Y27
-  reverseAddress: Y28
+  forwardAddress:
+    useDevice: 1
+    useDoubleWord: 0
+    isLocked: 0
+    label: "Y\uCEE8\uBCA0\uC774\uC5B41\uC815\uD68C\uC804"
+    address: Y27
+    description: "\uCEE8\uBCA0\uC774\uC5B4\uBC38\uD2B81 \uC815\uD68C\uC804 \uBA85\uB839
+      \uC2E0\uD638"
+    comment: "\uCEE8\uBCA0\uC774\uC5B4\n\uC815\uD68C\uC804\n\n"
+  reverseAddress:
+    useDevice: 1
+    useDoubleWord: 0
+    isLocked: 0
+    label: "Y\uCEE8\uBCA0\uC774\uC5B41\uC5ED\uD68C\uC804"
+    address: Y28
+    description: "\uCEE8\uBCA0\uC774\uC5B4\uBCA8\uD2B81 \uC5ED\uD68C\uC804 On \uBA85\uB839"
+    comment: "\uCEE8\uBCA0\uC774\uC5B4\n\uC5ED\uD68C\uC804\n\n"
   maxSpeed: 0.08
   onChangedForward:
     m_PersistentCalls:
@@ -12628,9 +12658,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 1
-    description: 
-    address: 
-    comment: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: "\uAD11\uD559\uC13C\uC11C2"
+    address: X06
+    description: "\uAD11\uD559\uC13C\uC11C2 \uBB3C\uCCB4 \uAC10\uC9C0 \uD53C\uB4DC\uBC31
+      \uC2E0\uD638"
+    comment: "\uC13C\uC11C2\n\uAC10\uC9C0ON\n\n"
   needCallback: 0
 --- !u!1 &1751823013
 GameObject:
@@ -14214,8 +14248,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 0
-    description: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: 
     address: 
+    description: 
     comment: 
   needCallback: 0
 --- !u!114 &1978541873
@@ -16055,9 +16092,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   address:
     useDevice: 1
-    description: 
-    address: 
-    comment: 
+    useDoubleWord: 0
+    isLocked: 0
+    label: "\uAD11\uD559\uC13C\uC11C1"
+    address: X05
+    description: "\uAD11\uD559\uC13C\uC11C1 \uBB3C\uCCB4 \uAC10\uC9C0 \uD53C\uB4DC\uBC31
+      \uC2E0\uD638"
+    comment: "\uC13C\uC11C1\n\uAC10\uC9C0ON\n\n"
   needCallback: 0
 --- !u!23 &4126811384556565434
 MeshRenderer:
@@ -16203,6 +16244,26 @@ PrefabInstance:
       value: Y21
       objectReference: {fileID: 0}
     - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.label
+      value: "Y\uC610\uB85C\uC6B0\uB7A8\uD504"
+      objectReference: {fileID: 0}
+    - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.address
+      value: Y21
+      objectReference: {fileID: 0}
+    - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.comment
+      value: "\uB178\uB791\uB7A8\uD504\nON\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.description
+      value: "\uC610\uB85C\uC6B0\uB7A8\uD504 On \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 645595214270359094, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: onChangedLamp.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 58412746}
@@ -16215,12 +16276,52 @@ PrefabInstance:
       value: Y22
       objectReference: {fileID: 0}
     - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.label
+      value: "Y\uADF8\uB9B0\uB7A8\uD504"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.address
+      value: Y22
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.comment
+      value: "\uADF8\uB9B0\uB7A8\uD504\nON\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.description
+      value: "\uADF8\uB9B0\uB7A8\uD504 \uC804\uC6D0 ON \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329346695001668282, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: onChangedLamp.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1862992398}
     - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: address
       value: Y20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.label
+      value: "Y\uB808\uB4DC\uB7A8\uD504"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.address
+      value: Y20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.comment
+      value: "\uB808\uB4DC\uB7A8\uD504\nON\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.isLocked
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
+      propertyPath: lampAddress.description
+      value: "\uB808\uB4DC \uB7A8\uD504 On \uBA85\uB839 \uC2E0\uD638"
       objectReference: {fileID: 0}
     - target: {fileID: 6731101487377662088, guid: 98faf845b4bffd6419e1cfbfc72c2db2, type: 3}
       propertyPath: onChangedLamp.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -16502,6 +16603,267 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RH_Address.label
+      value: "Y\uC778\uBC84\uD1301RH"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RL_Address.label
+      value: "Y\uC778\uBC84\uD1301RL"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RM_Address.label
+      value: "Y\uC778\uBC84\uD1301RM"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: SU_Address.label
+      value: "\uC778\uBC84\uD1301SU"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: MRS_Address.label
+      value: "Y\uC778\uBC84\uD1301\uBE44\uC0C1\uC815\uC9C0"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RST_Address.label
+      value: "Y\uC778\uBC84\uD1301\uB9AC\uC14B"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RUN_Address.label
+      value: "\uC778\uBC84\uD1301RUN"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STF_Address.label
+      value: "Y\uC778\uBC84\uD1301\uC815\uD68C\uC804"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STR_Address.label
+      value: "Y\uC778\uBC84\uD1301\uC5ED\uD68C\uC804"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RH_Address.address
+      value: Y2F
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RH_Address.comment
+      value: "\uC778\uBC84\uD1301\nRH\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RL_Address.address
+      value: Y2D
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RL_Address.comment
+      value: "\uC778\uBC84\uD1301\nRL\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RM_Address.address
+      value: Y2E
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RM_Address.comment
+      value: "\uC778\uBC84\uD1301\nRM\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: SU_Address.address
+      value: X03
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: SU_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uBAA9\uD45C\uB3C4\uB2EC\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: ALERT_Address.label
+      value: "\uC778\uBC84\uD1301ALERT"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: MRS_Address.address
+      value: Y2B
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: MRS_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uBE44\uC0C1\uC815\uC9C0\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RH_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RL_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RM_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RST_Address.address
+      value: Y2C
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RST_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uB9AC\uC14B\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RUN_Address.address
+      value: X02
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RUN_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uC6B4\uD589\uC911\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STF_Address.address
+      value: Y29
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STF_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uC815\uD68C\uC804\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STR_Address.address
+      value: Y2A
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STR_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uC5ED\uD68C\uC804\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: SU_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: analogAddress.label
+      value: "Y\uC778\uBC84\uD1301\uC544\uB0A0\uB85C\uADF8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: MRS_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RH_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RL_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RM_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RST_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STF_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STR_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: SU_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: ALERT_Address.address
+      value: X04
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: ALERT_Address.comment
+      value: "\uC778\uBC84\uD1301\n\uACE0\uC7A5ON\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: MRS_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RST_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RUN_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STF_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STR_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: analogAddress.address
+      value: U4\G1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: analogAddress.comment
+      value: "\uC778\uBC84\uD1301\n\uC544\uB0A0\uB85C\uADF8\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: ALERT_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RH_Address.description
+      value: "\uC778\uBC84\uD1301 \uACE0\uB2E8 \uC18D\uB3C4 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RL_Address.description
+      value: "\uC778\uBC84\uD1301 \uC800\uB2E8 \uC18D\uB3C4 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RM_Address.description
+      value: "\uC778\uBC84\uD1301 \uC911\uB2E8 \uC18D\uB3C4 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: SU_Address.description
+      value: "\uC778\uBC84\uD1301 \n\uBAA9\uD45CHz \uB3C4\uB2EC \uD53C\uB4DC\uBC31
+        \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: analogAddress.isLocked
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: ALERT_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: MRS_Address.description
+      value: "\uC778\uBC84\uD1301 \uBE44\uC0C1\uC815\uC9C0 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RST_Address.description
+      value: "\uC778\uBC84\uD1301 \uB9AC\uC14B \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: RUN_Address.description
+      value: "\uC778\uBC84\uD1301 \n\uC6B4\uD589\uC911 \uD53C\uB4DC\uBC31 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STF_Address.description
+      value: "\uC778\uBC84\uD1301 \uC815\uD68C\uC804 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: STR_Address.description
+      value: "\uC778\uBC84\uD1301 \uC5ED\uD68C\uC804 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: ALERT_Address.description
+      value: "\uC778\uBC84\uD1301\n\uACE0\uC7A5 \uD53C\uB4DC\uBC31 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: analogAddress.description
+      value: "\uC778\uBC84\uD1301 \uC544\uB0A0\uB85C\uADF8 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
+      propertyPath: analogAddress.useDoubleWord
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7733470760517989064, guid: 2b8ac112a6d6c5841bf419b15417acae, type: 3}
       propertyPath: 'stepFrequencies.Array.data[2]'
       value: 25
       objectReference: {fileID: 0}
@@ -16694,20 +17056,102 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
-      propertyPath: forward_Address.useDevice
+      propertyPath: forward_Address.label
+      value: "Y\uC804\uC9C4\uC194\uBC38\uBE0C"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: reverse_Address.label
+      value: "Y\uD6C4\uD1F4\uC194\uBC38\uBE0C"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: forward_Address.address
+      value: Y23
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: forward_Address.comment
+      value: "\uC2E4\uB9B0\uB3541\n\uC804\uC9C4\uC194\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: reverse_Address.address
+      value: Y24
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: reverse_Address.comment
+      value: "\uC2E4\uB9B0\uB3541\n\uD6C4\uD1F4\uC194\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: forward_Address.isLocked
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: reverse_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: forward_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: reverse_Address.useDevice
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: forward_Address.description
+      value: "\uC2E4\uB9B0\uB3541 \uC804\uC9C4 \uC194\uB808\uB178\uC774\uB4DC \uBC38\uBE0C
+        On \uBA85\uB839\uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1512236146267740091, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: reverse_Address.description
+      value: "\uC2E4\uB9B0\uB3541 \uD6C4\uD1F4 \uC194\uB808\uB178\uC774\uB4DC \uBC38\uBE0C
+        On \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1748250820864792508, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.label
+      value: "\uC2E4\uB9B0\uB3541\uD6C4\uD1F4"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1748250820864792508, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.address
+      value: X01
+      objectReference: {fileID: 0}
+    - target: {fileID: 1748250820864792508, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.comment
+      value: "\uC2E4\uB9B0\uB3541\n\uD6C4\uD1F4\uC644\uB8CC\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1748250820864792508, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.isLocked
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1748250820864792508, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: address.useDevice
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1748250820864792508, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.description
+      value: "\uC2E4\uB9B0\uB3541 \uD6C4\uD1F4 \uB9AC\uB4DC \uC13C\uC11C \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1976856331749527187, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.label
+      value: "\uC2E4\uB9B0\uB3541\uC804\uC9C4"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1976856331749527187, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.address
+      value: X00
+      objectReference: {fileID: 0}
+    - target: {fileID: 1976856331749527187, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.comment
+      value: "\uC2E4\uB9B0\uB354\n\uC804\uC9C4\uC644\uB8CC\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1976856331749527187, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.isLocked
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1976856331749527187, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: address.useDevice
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1976856331749527187, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
+      propertyPath: address.description
+      value: "\uC2E4\uB9B0\uB3541 \uC804\uC9C4 \uB9AC\uB4DC \uC13C\uC11C \uC2E0\uD638"
       objectReference: {fileID: 0}
     - target: {fileID: 2837372734895063044, guid: dfa61b9dc2d49994eb71259e1cdc97ae, type: 3}
       propertyPath: onChangedDetect.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -16858,12 +17302,48 @@ PrefabInstance:
       value: Y26
       objectReference: {fileID: 0}
     - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: forward_Address.label
+      value: "\uBAA8\uD1301\uC815\uD68C\uC804"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: reverse_Address.label
+      value: "\uBAA8\uD1301\uC5ED\uD68C\uC804"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: forward_Address.address
+      value: Y25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: forward_Address.comment
+      value: "\uBAA8\uD1301\n\uC815\uD68C\uC804ON\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: reverse_Address.address
+      value: Y26
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: reverse_Address.comment
+      value: "\uBAA8\uD1301\n\uC5ED\uD68C\uC804ON\n\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: forward_Address.isLocked
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
       propertyPath: forward_Address.useDevice
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
       propertyPath: reverse_Address.useDevice
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: forward_Address.description
+      value: "AC\uBAA8\uD1301 \uC815\uD68C\uC804 \uBA85\uB839 \uC2E0\uD638"
+      objectReference: {fileID: 0}
+    - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
+      propertyPath: reverse_Address.description
+      value: "AC\uBAA8\uD1301 \uC5ED\uD68C\uC804 \uBA85\uB839 \uC2E0\uD638"
       objectReference: {fileID: 0}
     - target: {fileID: 3976738803608589510, guid: 82037f13b02f0bd4b94c739f2e2495a0, type: 3}
       propertyPath: onChangedForward.m_PersistentCalls.m_Calls.Array.data[0].m_Target

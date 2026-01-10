@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class LampController : MonoBehaviour
+public class LampController : MXObject
 {
     #region Variables
     [Tooltip("램프에 불이 들어오는 매터리얼이 반드시 첫번째 매터리얼이어야 합니다.")]
@@ -9,6 +9,7 @@ public class LampController : MonoBehaviour
 
     [Tooltip("PLC와 연결하려면 반드시 어드레스를 입력해주세요.")]
     public string address;                  //PLC 디바이스 주소
+    public DeviceAddress lampAddress = new DeviceAddress("Lamp");
 
     public UnityEvent<bool> onChangedLamp;
 

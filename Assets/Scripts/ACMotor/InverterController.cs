@@ -35,9 +35,9 @@ public class InverterController : MXObject
     [Header("다단 속도 설정")]
     public bool useStep = false;                //단단 속도 제어. true로 변경하면 인버터 직접 제어는 우선순위에서 밀림.
                                                             //SetTargetHz, IncreaseTargetHz, DecreaseTargetHz
-    public DeviceAddress RH_Address = new DeviceAddress("고단 속도 명령 신호");        //고단
-    public DeviceAddress RM_Address = new DeviceAddress("중단 속도 명령 신호");        //중단
-    public DeviceAddress RL_Address = new DeviceAddress("저단 속도 명령 신호");         //저단
+    public DeviceAddress RL_Address = new ("저단 속도 명령 신호");         //저단
+    public DeviceAddress RM_Address = new ("중단 속도 명령 신호");        //중단
+    public DeviceAddress RH_Address = new ("고단 속도 명령 신호");        //고단
 
 
     public float[] stepFrequencies = new float[8]
@@ -49,6 +49,7 @@ public class InverterController : MXObject
     public bool useAnalogInput = false;       //아날로그 신호로 제어. true로 할 경우 인버터 직접 제어함수가 작동하지 않게 바뀜
                                                               //SetTargetHz, IncreaseTargetHz, DecreaseTargetHz
     public string AnalogAddress;  //아날로그 신호
+    public DeviceAddress analogAddress = new ("아날로그 명령 신호");
     public int analogMaxResolution = 4000; //분해능(미쯔비시 : 4000, LS : 16000)
 
     [Header("상태 모니터링")]

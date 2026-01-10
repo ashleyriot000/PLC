@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using System;
 
 [RequireComponent(typeof (ConveyorBelt)), RequireComponent(typeof(BoxCollider))]
-public class ConveyorController : MonoBehaviour
+public class ConveyorController : MXObject
 {
     #region Variables
     public ConveyorBelt belt;                   //컨베이어 벨트
@@ -13,8 +13,8 @@ public class ConveyorController : MonoBehaviour
     public string movableTag;                  //이동가능한 오브젝트 태그(비어 있으면 검사 안함)
     public string movableName;              //이동가능한 오브젝트 이름(비어 있으면 검사 안함)
 
-    public string forwardAddress;
-    public string reverseAddress;
+    public DeviceAddress forwardAddress = new DeviceAddress("정회전 On 명령");
+    public DeviceAddress reverseAddress = new DeviceAddress("역회전 On 명령");
 
     public float maxSpeed = 10f;       //초당 최대 이동 속도  
 
@@ -96,11 +96,11 @@ public class ConveyorController : MonoBehaviour
 
     private void Start()
     {
-        if (!string.IsNullOrEmpty(forwardAddress))
-            MXRequester.Get.AddDeviceAddress(forwardAddress, ChangedForward);
+        if (forwardAddress.useDevice && !string.IsNullOrEmpty(forwardAddress.address))
+            MXRequester.Get.AddDeviceAddress(forwardAddress.address, ChangedForward);
 
-        if(!string.IsNullOrEmpty(reverseAddress))
-            MXRequester.Get.AddDeviceAddress(reverseAddress, ChangedReverse);
+        if(reverseAddress.useDevice && !string.IsNullOrEmpty(reverseAddress.address))
+            MXRequester.Get.AddDeviceAddress(reverseAddress.address, ChangedReverse);
     }
 
     private void FixedUpdate()
