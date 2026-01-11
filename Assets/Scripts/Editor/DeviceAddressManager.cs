@@ -14,9 +14,10 @@ public class DeviceAddressManager : EditorWindow
         public SerializedObject serializedObj;
         public SerializedProperty property;
         public SerializedProperty propUse;
-        public SerializedProperty propDouble; // [New] Double Word 속성
+        public SerializedProperty propDouble;
         public SerializedProperty propAddr;
-        public SerializedProperty propDesc;
+        public SerializedProperty propDesc;    // 설명 (Description)
+        public SerializedProperty propComment; // [New] 코멘트 (Comment - 4줄)
         public SerializedProperty propLabel;
         public SerializedProperty propLocked;
         public string varName;
@@ -118,18 +119,24 @@ public class DeviceAddressManager : EditorWindow
         }
 
         GUILayout.FlexibleSpace();
-        GUILayout.Label("Ver 5.1 (MXObject Fix)", EditorStyles.miniLabel);
+        GUILayout.Label("Ver 5.6 (Comment Data Fix)", EditorStyles.miniLabel);
         GUILayout.EndHorizontal();
     }
 
+    // -----------------------------------------------------------------------------------
+    // 코멘트 내보내기 (PLC 헤더 + 탭 구분자 + 실제 코멘트 데이터 사용)
+    // -----------------------------------------------------------------------------------
     private void ExportToCommentCSV()
     {
         string path = EditorUtility.SaveFilePanel("Export Comments", "", "COMMENT.csv", "csv");
         if (string.IsNullOrEmpty(path)) return;
 
         StringBuilder sb = new StringBuilder();
-        sb.Append("\"EX01\"\r\n");
-        sb.Append("\"디바이스명\"\t\"코멘트\"\r\n");
+
+        // 헤더: "PLC"
+        sb.Append("\"Comment Export\"\r\n");
+        // 컬럼명
+        sb.Append("\"Device Name\"\t\"Comment\"\r\n");
 
         var allLists = new List<List<DeviceItem>> { listX, listY, listM, listD, listEtc };
         foreach (var list in allLists)
@@ -147,19 +154,31 @@ public class DeviceAddressManager : EditorWindow
             item.serializedObj.Update();
             string addr = item.propAddr.stringValue;
             if (string.IsNullOrEmpty(addr)) continue;
-            string desc = EscapeCSV(item.propDesc.stringValue);
-            string safeAddr = EscapeCSV(addr);
-            sb.Append($"\"{safeAddr}\"\t\"{desc}\"\r\n");
+
+            // 1. 주소 정제 (앞자리 0 제거)
+            string cleanAddr = SanitizeAddressForExport(addr);
+
+            // 2. [수정됨] Description이 아니라 실제 Comment 필드 내용을 가져옴
+            string rawComment = item.propComment.stringValue;
+
+            // 3. 특수문자 처리 (줄바꿈 -> 공백 치환 포함)
+            string safeComment = EscapeCSV(rawComment);
+            string safeAddr = EscapeCSV(cleanAddr);
+
+            sb.Append($"\"{safeAddr}\"\t\"{safeComment}\"\r\n");
         }
     }
 
+    // -----------------------------------------------------------------------------------
+    // 라벨 내보내기
+    // -----------------------------------------------------------------------------------
     private void ExportToLabelCSV()
     {
         string path = EditorUtility.SaveFilePanel("Export Global Labels", "", "Global1.csv", "csv");
         if (string.IsNullOrEmpty(path)) return;
 
         StringBuilder sb = new StringBuilder();
-        sb.Append("\"(Untitled Project)\"\r\n");
+        sb.Append("\"Label Export\"\r\n");
         sb.Append("\"Class\"\t\"Label Name\"\t\"Data Type\"\t\"Constant\"\t\"Device\"\t\"Comment\"\t\"Remark\"\t\"Relation with System Label\"\t\"System Label Name\"\t\"Attribute\"\r\n");
 
         var allLists = new List<List<DeviceItem>> { listX, listY, listM, listD, listEtc };
@@ -182,23 +201,61 @@ public class DeviceAddressManager : EditorWindow
 
             if (string.IsNullOrEmpty(labelName)) continue;
 
-            string dataType = DetectDataType(addr, isDouble);
+            string cleanAddr = SanitizeAddressForExport(addr);
+
+            string dataType = DetectDataType(cleanAddr, isDouble);
+            // 라벨 내보내기의 'Comment' 컬럼에는 무엇을 넣을까요?
+            // 보통 라벨 설명은 짧은 'Description'을 사용하는 경우가 많지만,
+            // 통일성을 위해 여기서도 'Description'을 유지하거나 'Comment'로 바꿀 수 있습니다.
+            // 일단 기존 코드인 'Description(propDesc)'을 유지합니다. 
+            // (라벨 리스트에서의 코멘트는 보통 짧은 설명을 의미하기 때문입니다)
             string comment = EscapeCSV(item.propDesc.stringValue);
-            string safeAddr = EscapeCSV(addr);
+
+            string safeAddr = EscapeCSV(cleanAddr);
             string safeLabel = EscapeCSV(labelName);
 
             sb.Append($"\"VAR_GLOBAL\"\t\"{safeLabel}\"\t\"{dataType}\"\t\"\"\t\"{safeAddr}\"\t\"{comment}\"\t\"\"\t\"\"\t\"\"\t\"\"\r\n");
         }
     }
 
+    private string SanitizeAddressForExport(string fullAddr)
+    {
+        if (string.IsNullOrEmpty(fullAddr)) return "";
+
+        var match = Regex.Match(fullAddr, @"^([A-Za-z]+)([0-9A-Fa-f]+)$");
+        if (!match.Success) return fullAddr;
+
+        string prefix = match.Groups[1].Value.ToUpper();
+        string numStr = match.Groups[2].Value;
+
+        if (prefix == "X" || prefix == "Y")
+        {
+            try
+            {
+                int val = System.Convert.ToInt32(numStr, 16);
+                return prefix + val.ToString("X");
+            }
+            catch { return fullAddr; }
+        }
+        else
+        {
+            try
+            {
+                int val = int.Parse(numStr);
+                return prefix + val.ToString();
+            }
+            catch { return fullAddr; }
+        }
+    }
+
     private string DetectDataType(string address, bool isDouble)
     {
-        if (string.IsNullOrEmpty(address)) return "BOOL";
+        if (string.IsNullOrEmpty(address)) return "";
         char prefix = address.ToUpper()[0];
 
         switch (prefix)
         {
-            case 'X': case 'Y': case 'M': case 'B': return "BOOL";
+            case 'X': case 'Y': case 'M': return "BOOL";
             case 'D':
             case 'W':
             case 'R':
@@ -214,7 +271,8 @@ public class DeviceAddressManager : EditorWindow
     private string EscapeCSV(string input)
     {
         if (string.IsNullOrEmpty(input)) return "";
-        return input.Replace("\n", " ").Replace("\r", "").Replace("\"", "\"\"");
+        // 줄바꿈, 탭, 따옴표 처리
+        return input.Replace("\n", " ").Replace("\r", "").Replace("\t", " ").Replace("\"", "\"\"");
     }
 
     private void WriteFile(string path, string content)
@@ -231,6 +289,8 @@ public class DeviceAddressManager : EditorWindow
         }
     }
 
+    // -----------------------------------------------------------------------------------
+
     private void DrawSidebar()
     {
         GUILayout.BeginVertical("ProjectBrowserBottomBarBg", GUILayout.Width(SidebarWidth), GUILayout.ExpandHeight(true));
@@ -241,7 +301,6 @@ public class DeviceAddressManager : EditorWindow
 
             showX = DrawDropZone("Input (X) - Hex", listX, new Color(0.8f, 1f, 1f), "X", showX);
             showY = DrawDropZone("Output (Y) - Hex", listY, new Color(1f, 0.9f, 0.8f), "Y", showY);
-            // [수정] Buffer(M) -> Internal(M)
             showM = DrawDropZone("Internal (M) - Dec", listM, new Color(0.9f, 1f, 0.8f), "M", showM);
             showD = DrawDropZone("Data (D) - Dec", listD, new Color(0.9f, 0.8f, 1f), "D", showD);
             showEtc = DrawDropZone("Others (Manual)", listEtc, new Color(1f, 0.8f, 1f), "Etc", showEtc);
@@ -594,8 +653,6 @@ public class DeviceAddressManager : EditorWindow
     {
         List<DeviceItem> allItems = new List<DeviceItem>();
 
-        // [수정] Deprecated 된 FindObjectsOfType 대신 FindObjectsByType 사용
-        // [수정] 스캔 대상 MonoBehaviour -> MXObject (상속 구조 반영)
         MXObject[] scripts = FindObjectsByType<MXObject>(FindObjectsSortMode.None);
 
         foreach (var script in scripts)
@@ -620,6 +677,7 @@ public class DeviceAddressManager : EditorWindow
                         propDouble = prop.FindPropertyRelative("useDoubleWord"),
                         propAddr = prop.FindPropertyRelative("address"),
                         propDesc = prop.FindPropertyRelative("description"),
+                        propComment = prop.FindPropertyRelative("comment"), // [New] Scan Logic
                         propLabel = prop.FindPropertyRelative("label"),
                         propLocked = prop.FindPropertyRelative("isLocked"),
                         varName = iter.displayName

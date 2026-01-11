@@ -9,8 +9,6 @@ public class MagneticSensor : MonoBehaviour
     public LayerMask detectableLayer;       //감지 가능한 레이어
     public string detectableName;             //감지 가능한 이름
 
-    public string sensorAddress;               //PLC 입출력 주소
-
     public UnityEvent<bool> onChangedDetect;
 
     private bool _hasDetected = false;
@@ -40,11 +38,6 @@ public class MagneticSensor : MonoBehaviour
 
         if (sensor != null)
             sensor.isTrigger = true;
-
-        if (string.IsNullOrEmpty(sensorAddress))
-        {
-            Debug.LogWarning($"{gameObject.name} PLC에 할당될 어드레스 값이 비어있습니다.");
-        }
 
         HasDetected = false;
     }
