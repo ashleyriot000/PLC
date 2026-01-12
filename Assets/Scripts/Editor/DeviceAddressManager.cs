@@ -112,10 +112,18 @@ public class DeviceAddressManager : EditorWindow
         {
             ExportToCommentCSV();
         }
+        if (GUILayout.Button("Export Comments(KOR)", EditorStyles.toolbarButton, GUILayout.Width(160)))
+        {
+            ExportToCommentCSV(true);
+        }
 
         if (GUILayout.Button("Export Labels", EditorStyles.toolbarButton, GUILayout.Width(100)))
         {
             ExportToLabelCSV();
+        }
+        if (GUILayout.Button("Export Labels(KOR)", EditorStyles.toolbarButton, GUILayout.Width(140)))
+        {
+            ExportToLabelCSV(true);
         }
 
         GUILayout.FlexibleSpace();
@@ -126,9 +134,13 @@ public class DeviceAddressManager : EditorWindow
     // -----------------------------------------------------------------------------------
     // 코멘트 내보내기 (PLC 헤더 + 탭 구분자 + 실제 코멘트 데이터 사용)
     // -----------------------------------------------------------------------------------
-    private void ExportToCommentCSV()
+    private void ExportToCommentCSV(bool isKorean = false)
     {
-        string path = EditorUtility.SaveFilePanel("Export Comments", "", "COMMENT.csv", "csv");
+        
+        string path = isKorean ? 
+            EditorUtility.SaveFilePanel("Export Comments", "", "COMMENT(KOR).csv", "csv") :        
+            EditorUtility.SaveFilePanel("Export Comments", "", "COMMENT.csv", "csv");
+
         if (string.IsNullOrEmpty(path)) return;
 
         StringBuilder sb = new StringBuilder();
@@ -136,7 +148,14 @@ public class DeviceAddressManager : EditorWindow
         // 헤더: "PLC"
         sb.Append("\"Comment Export\"\r\n");
         // 컬럼명
-        sb.Append("\"Device Name\"\t\"Comment\"\r\n");
+        if(isKorean)
+        {
+            sb.Append("\"디바이스명\"\t\"코멘트\"\r\n");
+        }
+        else
+        {
+            sb.Append("\"Device Name\"\t\"Comment\"\r\n");
+        }
 
         var allLists = new List<List<DeviceItem>> { listX, listY, listM, listD, listEtc };
         foreach (var list in allLists)
@@ -172,14 +191,24 @@ public class DeviceAddressManager : EditorWindow
     // -----------------------------------------------------------------------------------
     // 라벨 내보내기
     // -----------------------------------------------------------------------------------
-    private void ExportToLabelCSV()
+    private void ExportToLabelCSV(bool isKorean = false)
     {
-        string path = EditorUtility.SaveFilePanel("Export Global Labels", "", "Global1.csv", "csv");
+        string path = isKorean ?
+            EditorUtility.SaveFilePanel("Export Global Labels", "", "GlobalLabel(KOR).csv", "csv") :
+            EditorUtility.SaveFilePanel("Export Global Labels", "", "GlobalLabel.csv", "csv");
+
         if (string.IsNullOrEmpty(path)) return;
 
         StringBuilder sb = new StringBuilder();
         sb.Append("\"Label Export\"\r\n");
-        sb.Append("\"Class\"\t\"Label Name\"\t\"Data Type\"\t\"Constant\"\t\"Device\"\t\"Comment\"\t\"Remark\"\t\"Relation with System Label\"\t\"System Label Name\"\t\"Attribute\"\r\n");
+        if(isKorean)
+        {
+            sb.Append("\"클래스\"\t\"라벨명\"\t\"데이터형\"\t\"상수값\"\t\"디바이스\"\t\"코멘트\"\t\"비고\"\t\"시스템 라벨 관련\"\t\"시스템 라벨명\"\t\"속성\"\r\n");
+        }
+        else
+        {
+            sb.Append("\"Class\"\t\"Label Name\"\t\"Data Type\"\t\"Constant\"\t\"Device\"\t\"Comment\"\t\"Remark\"\t\"Relation with System Label\"\t\"System Label Name\"\t\"Attribute\"\r\n");
+        }
 
         var allLists = new List<List<DeviceItem>> { listX, listY, listM, listD, listEtc };
         foreach (var list in allLists)
@@ -203,14 +232,8 @@ public class DeviceAddressManager : EditorWindow
 
             string cleanAddr = SanitizeAddressForExport(addr);
 
-            string dataType = DetectDataType(cleanAddr, isDouble);
-            // 라벨 내보내기의 'Comment' 컬럼에는 무엇을 넣을까요?
-            // 보통 라벨 설명은 짧은 'Description'을 사용하는 경우가 많지만,
-            // 통일성을 위해 여기서도 'Description'을 유지하거나 'Comment'로 바꿀 수 있습니다.
-            // 일단 기존 코드인 'Description(propDesc)'을 유지합니다. 
-            // (라벨 리스트에서의 코멘트는 보통 짧은 설명을 의미하기 때문입니다)
-            string comment = EscapeCSV(item.propDesc.stringValue);
-
+            string dataType = DetectDataType(cleanAddr, isDouble);            
+            string comment = EscapeCSV(item.propComment.stringValue);
             string safeAddr = EscapeCSV(cleanAddr);
             string safeLabel = EscapeCSV(labelName);
 

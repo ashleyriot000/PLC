@@ -3,455 +3,395 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class ServoAmp : MXObject
+public class ServoAmp : MonoBehaviour
 {
-    #region Hardware Setup
+    #region 1. Hardware Setup
     [Header("Physics Components")]
-    [Tooltip("실제 움직이는 파트의 리지드바디")]
-    public Rigidbody movingPartRb;
-    [Tooltip("구동을 담당할 조인트")]
+    public Rigidbody movingPart;
     public ConfigurableJoint driveJoint;
 
-    [Header("Sensors (Magnetic Sensor)")]
-    [Tooltip("MagneticSensor 스크립트가 붙은 오브젝트를 연결하세요.")]
-    public MagneticSensor sensorFLS; // 정방향 리미트 (Upper Limit)
-    public MagneticSensor sensorRLS; // 역방향 리미트 (Lower Limit)
-    public MagneticSensor sensorDOG; // 근점 도그 (Near Dog)
+    [Header("Sensors")]
+    public MagneticSensor sensorFLS;
+    public MagneticSensor sensorRLS;
+    public MagneticSensor sensorDOG;
 
     [Header("Axis Settings")]
     public int axisNo = 1;
-    public MotionParameter parameter = new MotionParameter();
-    public List<PositioningData> positioningDataList = new List<PositioningData>();
+    public MotionParameter parameter = new ();
+    public List<PositioningData> positioningDataList = new();
     #endregion
 
-    #region Internal State
-    [Header("Monitoring")]
+    #region 2. Internal State
+    [Header("Status Monitor")]
+    [SerializeField] private bool _isServoOn = false; // 서보 상태
     [SerializeField] private AxisState _currentState = AxisState.Standby;
     [SerializeField] private MotionError _lastError = MotionError.None;
 
-    // 센서 상태 캐싱
-    [SerializeField] private bool _signalFLS = false;
-    [SerializeField] private bool _signalRLS = false;
-    [SerializeField] private bool _signalDOG = false;
+    [SerializeField] private int _currentPositionRaw = 0;
+    [SerializeField] private int _currentSpeedRaw = 0;
 
-    // 물리적 상태 (User Unit 기준: mm, degree 등)
-    [SerializeField] private double _currentPositionUser = 0d;
-    [SerializeField] private double _currentVelocityUser = 0d;
-    [SerializeField] private int _currentPulse = 0;
+    // 내부 물리 연산용 (mm 단위)
+    private double _currentPositionMM = 0d;
+    private double _currentVelocityMM = 0d;
 
-    // 제어 프로파일링 변수
-    private double _commandPositionUser = 0d; // 내부 목표 위치 (프로파일러 계산값)
-    private double _finalTargetPosUser = 0d;  // 최종 목표 위치
-    private double _targetSpeedUser = 0d;     // 목표 속도 (UserUnit/min)
-    private double _activeAccelTime = 0d;     // 가속 시간 (ms)
-    private double _activeDecelTime = 0d;     // 감속 시간 (ms)
+    private double _commandPositionMM = 0d;
+    private double _finalTargetPosMM = 0d;
+    private double _targetSpeedMM = 0d;
 
-    // 원점 복귀 시퀀스 스텝
+    private double _activeAccelTime = 0d;
+    private double _activeDecelTime = 0d;
     private int _homingSequenceStep = 0;
+
+    // 센서 상태 캐싱
+    private bool _signalFLS = false;
+    private bool _signalRLS = false;
+    private bool _signalDOG = false;
     #endregion
 
-    #region Properties
-    public int CurrentPulse => _currentPulse;
-
-    // [IsComplete] 에러 없음 && 이동 중 아님 && 목표 위치 도달 (인포지션 내)
-    public bool IsComplete
-    {
-        get
-        {
-            if (_currentState == AxisState.Error) return false;
-            if (IsBusy) return false;
-            return Math.Abs(_finalTargetPosUser - _currentPositionUser) <= parameter.inPosWidth;
-        }
-    }
-
+    #region 3. Properties
+    public int CurrentPulse => _currentPositionRaw;
     public bool IsBusy => _currentState != AxisState.Standby && _currentState != AxisState.Error;
     public bool IsError => _currentState == AxisState.Error;
     public short ErrorCode => (short)_lastError;
-
-    // 외부 확인용 센서 프로퍼티
-    public bool SignalFLS => _signalFLS;
-    public bool SignalRLS => _signalRLS;
-    public bool SignalDOG => _signalDOG;
+    public bool IsServoOn => _isServoOn;
     #endregion
 
-    #region Unity Methods
+    #region 4. Unity Methods
     private void Awake()
     {
-        if (movingPartRb == null) movingPartRb = GetComponent<Rigidbody>();
-        if (driveJoint == null) driveJoint = GetComponent<ConfigurableJoint>();
+        if (movingPart == null) 
+            movingPart = GetComponent<Rigidbody>();
 
-        // [중요] 조인트 잠금 해제 (Locked 상태에서는 TargetPosition 작동 안함)
+        if(movingPart != null)
+        {
+            movingPart.automaticCenterOfMass = false;
+            movingPart.automaticInertiaTensor = false;
+        }
+
+
+        if (driveJoint == null) 
+            driveJoint = GetComponent<ConfigurableJoint>();
+
+        if(driveJoint != null)
+        {
+            driveJoint.xMotion = parameter.actuatorType == ActuatorType.Linear ? 
+                ConfigurableJointMotion.Free : ConfigurableJointMotion.Locked;
+
+            driveJoint.yMotion = ConfigurableJointMotion.Locked;
+            driveJoint.zMotion = ConfigurableJointMotion.Locked;
+
+            driveJoint.angularXMotion = parameter.actuatorType == ActuatorType.Rotary ?
+                ConfigurableJointMotion.Free : ConfigurableJointMotion.Locked;
+            driveJoint.angularYMotion = ConfigurableJointMotion.Locked;
+            driveJoint.angularZMotion = ConfigurableJointMotion.Locked;
+        }
+
         UnlockJointMotion();
-
-        // 물리 스프링 설정
         SetupJointPhysics();
 
-        // 초기 위치 동기화
-        _currentPositionUser = GetPositionUserUnit();
-        _commandPositionUser = _currentPositionUser;
+        // 런타임 초기화
+        _currentPositionMM = GetPhysicalPositionMM();
+        _currentPositionRaw = MMToRaw(_currentPositionMM);
+        _commandPositionMM = _currentPositionMM;
     }
 
     private void Start()
     {
-        // MagneticSensor 이벤트 리스너 등록
-        if (sensorFLS != null)
-        {
-            _signalFLS = sensorFLS.HasDetected;
-            sensorFLS.onChangedDetect.AddListener(OnChangedFLS);
-        }
-        if (sensorRLS != null)
-        {
-            _signalRLS = sensorRLS.HasDetected;
-            sensorRLS.onChangedDetect.AddListener(OnChangedRLS);
-        }
-        if (sensorDOG != null)
-        {
-            _signalDOG = sensorDOG.HasDetected;
-            sensorDOG.onChangedDetect.AddListener(OnChangedDOG);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (sensorFLS != null) sensorFLS.onChangedDetect.RemoveListener(OnChangedFLS);
-        if (sensorRLS != null) sensorRLS.onChangedDetect.RemoveListener(OnChangedRLS);
-        if (sensorDOG != null) sensorDOG.onChangedDetect.RemoveListener(OnChangedDOG);
+        if (sensorFLS != null) sensorFLS.onChangedDetect.AddListener(OnChangedFLS);
+        if (sensorRLS != null) sensorRLS.onChangedDetect.AddListener(OnChangedRLS);
+        if (sensorDOG != null) sensorDOG.onChangedDetect.AddListener(OnChangedDOG);
     }
 
     private void FixedUpdate()
     {
-        // 1. 현재 물리 위치 측정 (Unity -> User Unit 변환)
-        _currentPositionUser = GetPositionUserUnit();
-        _currentPulse = (int)(_currentPositionUser * parameter.GetPulseRatio());
+        // 1. 상태 업데이트
+        _currentPositionMM = GetPhysicalPositionMM();
+        _currentPositionRaw = MMToRaw(_currentPositionMM);
+        _currentSpeedRaw = MMToRaw(_currentVelocityMM * 60);
 
-        // 2. 하드웨어 리미트 체크 (인터락)
+        // 2. 센서 체크
         CheckHardwareLimits();
 
-        // 3. 에러 발생 시 위치 고수 (급정지)
+        // [서보 OFF] 물리 제어 중단 (Free)
+        if (!_isServoOn) return;
+
+        // 3. 에러 시 정지
         if (_currentState == AxisState.Error)
         {
-            _targetSpeedUser = 0;
-            _commandPositionUser = _currentPositionUser; // 현재 위치 유지
-            ApplyPhysicsTarget(_commandPositionUser);
+            _targetSpeedMM = 0;
+            _commandPositionMM = _currentPositionMM;
+            ApplyPhysicsTarget(_commandPositionMM);
             return;
         }
 
-        // 4. 모션 로직 수행
-        if (_currentState == AxisState.Homing)
+        // 4. 동작 로직
+        if (_currentState == AxisState.Homing) UpdateHomingLogic();
+        else if (_currentState == AxisState.Positioning || _currentState == AxisState.Jogging) UpdateProfileLogic();
+        else ApplyPhysicsTarget(_commandPositionMM);
+    }
+    #endregion
+
+    #region 5. Control Signals (System)
+    public void SetServoOn(bool isOn)
+    {
+        if (_isServoOn == isOn) return;
+
+        _isServoOn = isOn;
+        if (_isServoOn)
         {
-            UpdateHomingLogic();
+            Debug.Log($"[Axis {axisNo}] Servo ON");
+            _commandPositionMM = _currentPositionMM; // 켜지는 순간 위치 고정
+            _currentState = AxisState.Standby;
+            _lastError = MotionError.None;
+            if (movingPart != null) movingPart.isKinematic = false;
         }
-        else if (_currentState == AxisState.Positioning || _currentState == AxisState.Jogging)
+        else
         {
-            UpdateProfileLogic();
-        }
-        else // Standby
-        {
-            // 대기 상태에서도 현재 위치 유지를 위해 Target 갱신 (외력 방지)
-            ApplyPhysicsTarget(_commandPositionUser);
+            Debug.Log($"[Axis {axisNo}] Servo OFF");
+            _currentState = AxisState.Standby;
+            _targetSpeedMM = 0;
         }
     }
     #endregion
 
-    #region Sensor Callbacks
-    public void OnChangedFLS(bool detected)
-    {
-        _signalFLS = detected;
-        // 정방향 이동 중 센서 감지 시 즉시 에러
-        if (_signalFLS && _currentVelocityUser > 0.1d) RaiseError(MotionError.HardwareStrokeLimit);
-    }
-    public void OnChangedRLS(bool detected)
-    {
-        _signalRLS = detected;
-        // 역방향 이동 중 센서 감지 시 즉시 에러
-        if (_signalRLS && _currentVelocityUser < -0.1d) RaiseError(MotionError.HardwareStrokeLimit);
-    }
-    public void OnChangedDOG(bool detected)
-    {
-        _signalDOG = detected;
-    }
-    #endregion
+    #region 6. Helper Functions
+    // [단위 변환] Property 사용 (자동 계산)
+    private double RawToMM(double rawValue) => rawValue * parameter.UnitMultiplier;
 
-    #region Physics & Unit Conversion
-    private void UnlockJointMotion()
+    private int MMToRaw(double mmValue)
+    {
+        if (parameter.UnitMultiplier <= 1e-9) return 0;
+        return (int)(mmValue / parameter.UnitMultiplier);
+    }
+
+    private double GetPhysicalPositionMM()
+    {
+        if (driveJoint == null) return 0;
+        float val = (parameter.actuatorType == ActuatorType.Linear) ?
+            driveJoint.transform.localPosition.x : driveJoint.transform.localEulerAngles.x;
+        return (parameter.actuatorType == ActuatorType.Linear) ? val * 1000d : val;
+    }
+
+    private void ApplyPhysicsTarget(double posMM)
     {
         if (driveJoint == null) return;
+        if (movingPart.IsSleeping()) movingPart.WakeUp();
 
         if (parameter.actuatorType == ActuatorType.Linear)
         {
-            driveJoint.xMotion = ConfigurableJointMotion.Free; // X축 이동 허용
-            // 나머지 축 고정
+            float unityTarget = (float)(posMM / 1000d);
+            driveJoint.targetPosition = new Vector3(unityTarget, 0, 0);
+        }
+        else
+        {
+            driveJoint.targetRotation = Quaternion.Euler((float)posMM, 0, 0);
+        }
+    }
+
+    private void UnlockJointMotion()
+    {
+        if (driveJoint == null) return;
+        if (parameter.actuatorType == ActuatorType.Linear)
+        {
+            driveJoint.xMotion = ConfigurableJointMotion.Free;
             driveJoint.yMotion = ConfigurableJointMotion.Locked;
             driveJoint.zMotion = ConfigurableJointMotion.Locked;
             driveJoint.angularXMotion = ConfigurableJointMotion.Locked;
             driveJoint.angularYMotion = ConfigurableJointMotion.Locked;
             driveJoint.angularZMotion = ConfigurableJointMotion.Locked;
         }
-        else // Rotary
+        else
         {
-            driveJoint.angularXMotion = ConfigurableJointMotion.Free; // X축 회전 허용
+            driveJoint.angularXMotion = ConfigurableJointMotion.Free;
             driveJoint.xMotion = ConfigurableJointMotion.Locked;
-            driveJoint.yMotion = ConfigurableJointMotion.Locked;
-            driveJoint.zMotion = ConfigurableJointMotion.Locked;
         }
-
-        if (movingPartRb != null) movingPartRb.isKinematic = false;
+        if (movingPart != null) movingPart.isKinematic = false;
     }
 
     private void SetupJointPhysics()
     {
         if (driveJoint == null) return;
-
-        // 서보 모터의 강한 토크를 시뮬레이션하기 위해 높은 Spring 값 사용
-        JointDrive drive = new JointDrive
-        {
-            positionSpring = 1000000f, // 강성 (Stiffness)
-            positionDamper = 1000f,    // 감쇠 (Damping)
-            maximumForce = float.MaxValue
-        };
-
-        if (parameter.actuatorType == ActuatorType.Linear)
-        {
-            driveJoint.xDrive = drive;
-        }
-        else
-        {
-            driveJoint.angularXDrive = drive;
-        }
-    }
-
-    private double GetPositionUserUnit()
-    {
-        if (driveJoint == null) return 0;
-
-        if (parameter.actuatorType == ActuatorType.Linear)
-        {
-            // Unity(m) -> User(mm)
-            float val = driveJoint.transform.localPosition.x;
-            return (parameter.usedUnit == UnitType.MM) ? val * 1000d : val;
-        }
-        else
-        {
-            // Unity(Deg) -> User(Deg)
-            return driveJoint.transform.localEulerAngles.x;
-        }
-    }
-
-    private void ApplyPhysicsTarget(double userPos)
-    {
-        if (driveJoint == null) return;
-
-        // [디버그] 물리 엔진 깨우기
-        if (movingPartRb.IsSleeping()) movingPartRb.WakeUp();
-
-        if (parameter.actuatorType == ActuatorType.Linear)
-        {
-            // User(mm) -> Unity(m)
-            float unityTarget = (float)((parameter.usedUnit == UnitType.MM) ? userPos / 1000d : userPos);
-            driveJoint.targetPosition = new Vector3(unityTarget, 0, 0);
-        }
-        else
-        {
-            // User(Deg) -> Unity(Deg)
-            driveJoint.targetRotation = Quaternion.Euler((float)userPos, 0, 0);
-        }
+        JointDrive drive = new JointDrive { positionSpring = 1000000f, positionDamper = 1000f, maximumForce = float.MaxValue };
+        if (parameter.actuatorType == ActuatorType.Linear) driveJoint.xDrive = drive;
+        else driveJoint.angularXDrive = drive;
     }
     #endregion
 
-    #region Motion Logic
+    #region 7. Motion Logic
     private void CheckHardwareLimits()
     {
-        if (_targetSpeedUser > 0 && _signalFLS) RaiseError(MotionError.HardwareStrokeLimit);
-        if (_targetSpeedUser < 0 && _signalRLS) RaiseError(MotionError.HardwareStrokeLimit);
+        if (_targetSpeedMM > 0 && _signalFLS) RaiseError(MotionError.HardwareStrokeLimit);
+        if (_targetSpeedMM < 0 && _signalRLS) RaiseError(MotionError.HardwareStrokeLimit);
     }
 
     private void UpdateProfileLogic()
     {
-        // 단위 변환: mm/min -> mm/sec
-        double speedLimitSec = parameter.speedLimit / 60d;
-        double targetSpeedSec = _targetSpeedUser / 60d;
+        double targetSpeedSec = _targetSpeedMM / 60d;
+        double speedLimitSec = (parameter.speedLimit * parameter.UnitMultiplier) / 60d;
 
-        // 1. 감속 거리 계산
         if (_currentState == AxisState.Positioning)
         {
-            double distToEnd = Math.Abs(_finalTargetPosUser - _commandPositionUser);
-            // 감속도 = Speed / Time(s)
+            double distToEnd = Math.Abs(_finalTargetPosMM - _commandPositionMM);
             double decelRate = speedLimitSec / (Math.Max(_activeDecelTime, 1) / 1000d);
-
-            // 정지거리 = v^2 / 2a
-            double stoppingDist = (_currentVelocityUser * _currentVelocityUser) / (2 * decelRate);
-
+            double stoppingDist = (_currentVelocityMM * _currentVelocityMM) / (2 * decelRate);
             if (distToEnd <= stoppingDist) targetSpeedSec = 0;
         }
 
-        // 2. 속도 프로파일 갱신
         double accelStep = (speedLimitSec / (Math.Max(_activeAccelTime, 1) / 1000d)) * Time.fixedDeltaTime;
         double decelStep = (speedLimitSec / (Math.Max(_activeDecelTime, 1) / 1000d)) * Time.fixedDeltaTime;
+        double maxChange = (Math.Abs(targetSpeedSec) > Math.Abs(_currentVelocityMM)) ? accelStep : decelStep;
 
-        double maxChange = (Math.Abs(targetSpeedSec) > Math.Abs(_currentVelocityUser)) ? accelStep : decelStep;
+        _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, (float)targetSpeedSec, (float)maxChange);
 
-        _currentVelocityUser = Mathf.MoveTowards((float)_currentVelocityUser, (float)targetSpeedSec, (float)maxChange);
-
-        // 3. 위치 적분
+        double inPosMM = parameter.inPosWidth * parameter.UnitMultiplier;
         if (_currentState == AxisState.Positioning &&
-            Math.Abs(_finalTargetPosUser - _commandPositionUser) < parameter.inPosWidth &&
-            Math.Abs(_currentVelocityUser) < 0.01d)
+            Math.Abs(_finalTargetPosMM - _commandPositionMM) < inPosMM &&
+            Math.Abs(_currentVelocityMM) < 0.01d)
         {
-            _commandPositionUser = _finalTargetPosUser;
-            _currentVelocityUser = 0;
+            _commandPositionMM = _finalTargetPosMM;
+            _currentVelocityMM = 0;
             _currentState = AxisState.Standby;
         }
         else
         {
-            _commandPositionUser += _currentVelocityUser * Time.fixedDeltaTime;
+            _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
         }
-
-        ApplyPhysicsTarget(_commandPositionUser);
+        ApplyPhysicsTarget(_commandPositionMM);
     }
 
     private void UpdateHomingLogic()
     {
+        double highSpeed = parameter.homingHighSpeed * parameter.UnitMultiplier;
+        double creepSpeed = parameter.homingCreepSpeed * parameter.UnitMultiplier;
+        double highSpeedSec = highSpeed / 60d;
+        double creepSpeedSec = creepSpeed / 60d;
         int dir = parameter.defaultHomingDirection;
-
-        // Homing 속도 변환 (/60)
-        double highSpeedSec = parameter.homingHighSpeed / 60d;
-        double creepSpeedSec = parameter.homingCreepSpeed / 60d;
 
         switch (_homingSequenceStep)
         {
-            case 0: // 고속 이동 (Dog 찾기)
-                _targetSpeedUser = parameter.homingHighSpeed * dir; // 모니터링용
+            case 0:
+                _targetSpeedMM = highSpeed * dir;
                 UpdateVelocityAndPos(highSpeedSec * dir, parameter.homingAccelTime);
-
-                if (_signalDOG) // Dog 감지
-                {
-                    Debug.Log($"[Axis {axisNo}] Near Dog Detected -> Creep Speed");
-                    _homingSequenceStep = 1;
-                }
+                if (_signalDOG) _homingSequenceStep = 1;
                 break;
-
-            case 1: // 크리프 속도 이동 (Dog 통과 대기)
-                _targetSpeedUser = parameter.homingCreepSpeed * dir;
+            case 1:
+                _targetSpeedMM = creepSpeed * dir;
                 UpdateVelocityAndPos(creepSpeedSec * dir, parameter.homingDecelTime);
-
-                if (!_signalDOG) // Dog 통과 (OFF)
-                {
-                    Debug.Log($"[Axis {axisNo}] Near Dog Passed -> Stopping");
-                    _homingSequenceStep = 2;
-                }
+                if (!_signalDOG) _homingSequenceStep = 2;
                 break;
-
-            case 2: // 정지 및 원점 확정
-                _targetSpeedUser = 0;
-                double speedLimitSec = parameter.speedLimit / 60d;
-                double stopDecel = (speedLimitSec / 0.05d) * Time.fixedDeltaTime; // 50ms 급제동
-
-                _currentVelocityUser = Mathf.MoveTowards((float)_currentVelocityUser, 0f, (float)stopDecel);
-                _commandPositionUser += _currentVelocityUser * Time.fixedDeltaTime;
-
-                if (Math.Abs(_currentVelocityUser) < 0.01d)
+            case 2:
+                _targetSpeedMM = 0;
+                double limitSec = (parameter.speedLimit * parameter.UnitMultiplier) / 60d;
+                double stopDecel = (limitSec / 0.05d) * Time.fixedDeltaTime;
+                _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, 0f, (float)stopDecel);
+                _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
+                if (Math.Abs(_currentVelocityMM) < 0.01d)
                 {
-                    _currentVelocityUser = 0;
-                    _commandPositionUser = 0; // 내부 좌표 리셋
-                    ApplyPhysicsTarget(0); // 물리 좌표 리셋
+                    _currentVelocityMM = 0; _commandPositionMM = 0; ApplyPhysicsTarget(0);
                     _currentState = AxisState.Standby;
-                    Debug.Log($"[Axis {axisNo}] Homing Completed.");
                 }
                 break;
         }
-        ApplyPhysicsTarget(_commandPositionUser);
+        ApplyPhysicsTarget(_commandPositionMM);
     }
 
     private void UpdateVelocityAndPos(double targetVelSec, double timeMs)
     {
-        double speedLimitSec = parameter.speedLimit / 60d;
-        double step = (speedLimitSec / (timeMs / 1000d)) * Time.fixedDeltaTime;
-
-        _currentVelocityUser = Mathf.MoveTowards((float)_currentVelocityUser, (float)targetVelSec, (float)step);
-        _commandPositionUser += _currentVelocityUser * Time.fixedDeltaTime;
+        double limitSec = (parameter.speedLimit * parameter.UnitMultiplier) / 60d;
+        double step = (limitSec / (timeMs / 1000d)) * Time.fixedDeltaTime;
+        _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, (float)targetVelSec, (float)step);
+        _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
     }
+
+    public void OnChangedFLS(bool d) { _signalFLS = d; if (d && _currentVelocityMM > 0) RaiseError(MotionError.HardwareStrokeLimit); }
+    public void OnChangedRLS(bool d) { _signalRLS = d; if (d && _currentVelocityMM < 0) RaiseError(MotionError.HardwareStrokeLimit); }
+    public void OnChangedDOG(bool d) { _signalDOG = d; }
     #endregion
 
-    #region Command Interface
+    #region 8. Commands (External)
     public void StartPositioning(int stepNo)
     {
+        if (!_isServoOn) { RaiseError(MotionError.DriveNotReady); return; }
         if (IsError) return;
+
+        if (stepNo == 9001)
+        {
+            StartHoming();
+            return;
+        }
+
         var data = positioningDataList.FirstOrDefault(x => x.stepNo == stepNo);
         if (data.stepNo == 0) { RaiseError(MotionError.DriveNotReady); return; }
 
-        Debug.Log($"[Axis {axisNo}] Start Positioning: {data.posAddress} (Speed: {data.commandSpeed})");
-
         _currentState = AxisState.Positioning;
-        _finalTargetPosUser = (data.controlMethod == ControlMethodType.INC_Linear1) ? _commandPositionUser + data.posAddress : data.posAddress;
 
-        double limit = parameter.speedLimit;
-        double cmdSpeed = Math.Min(data.commandSpeed, limit);
+        double scaledPos = data.posAddress * parameter.UnitMultiplier;
+        double scaledSpeed = data.commandSpeed * parameter.UnitMultiplier;
+        double scaledLimit = parameter.speedLimit * parameter.UnitMultiplier;
 
-        _targetSpeedUser = (_finalTargetPosUser > _commandPositionUser) ? cmdSpeed : -cmdSpeed;
+        Debug.Log($"[Axis {axisNo}] Start Pos No.{stepNo} (Raw:{data.posAddress} -> MM:{scaledPos:F3})");
+
+        _finalTargetPosMM = (data.controlMethod == ControlMethodType.INC_Linear1)
+            ? _commandPositionMM + scaledPos : scaledPos;
+
+        double cmdSpeed = Math.Min(scaledSpeed, scaledLimit);
+        _targetSpeedMM = (_finalTargetPosMM > _commandPositionMM) ? cmdSpeed : -cmdSpeed;
         _activeAccelTime = data.accelTime;
         _activeDecelTime = data.decelTime;
     }
 
-    public void StartJog(bool isForward)
+    public void ProcessJog(bool fwdOn, bool revOn)
     {
-        if (IsError) return;
-        Debug.Log($"[Axis {axisNo}] Start JOG {(isForward ? "Fwd" : "Rev")}");
+        if (!_isServoOn || IsError)
+        {
+            if (_currentState == AxisState.Jogging) StopJog();
+            return;
+        }
+
+        if (fwdOn && revOn) StopJog();
+        else if (fwdOn) { if (_currentState != AxisState.Jogging || _targetSpeedMM <= 0) StartJog(true); }
+        else if (revOn) { if (_currentState != AxisState.Jogging || _targetSpeedMM >= 0) StartJog(false); }
+        else { if (_currentState == AxisState.Jogging) StopJog(); }
+    }
+
+    private void StartHoming()
+    {
+        Debug.Log($"[Axis {axisNo}] Start Homing (9001)");
+        _currentState = AxisState.Homing;
+        _homingSequenceStep = 0;
+        _currentVelocityMM = 0;
+    }
+
+    private void StartJog(bool isForward)
+    {
         _currentState = AxisState.Jogging;
-        double limit = parameter.jogSpeedLimit;
-        _targetSpeedUser = isForward ? limit : -limit;
+        double scaledJogSpeed = parameter.jogSpeedLimit * parameter.UnitMultiplier;
+        _targetSpeedMM = isForward ? scaledJogSpeed : -scaledJogSpeed;
         _activeAccelTime = parameter.jogAccelTime;
         _activeDecelTime = parameter.jogdecelTime;
     }
 
-    public void StopJog()
-    {
-        if (_currentState == AxisState.Jogging)
-        {
-            Debug.Log($"[Axis {axisNo}] Stop JOG");
-            _targetSpeedUser = 0;
-            CancelInvoke(nameof(CheckStopState));
-            InvokeRepeating(nameof(CheckStopState), 0f, 0.1f);
-        }
-    }
-    private void CheckStopState()
-    {
-        if (Math.Abs(_currentVelocityUser) < 0.1d)
-        {
-            _currentState = AxisState.Standby;
-            CancelInvoke(nameof(CheckStopState));
-        }
-    }
-
-    public void StartHoming()
-    {
-        if (IsError) return;
-        Debug.Log($"[Axis {axisNo}] Start Homing");
-        _currentState = AxisState.Homing;
-        _homingSequenceStep = 0;
-        _currentVelocityUser = 0;
-    }
-
-    public void RaiseError(MotionError error)
-    {
-        _lastError = error;
-        _currentState = AxisState.Error;
-        Debug.LogError($"[Axis {axisNo}] Error: {error}");
-    }
-
-    public void RaiseWarning(MotionError warning)
-    {
-        if (IsError) return;
-        _lastError = warning;
-        Debug.LogWarning($"[Axis {axisNo}] Warning: {warning}");
-    }
-
-    public void ErrorReset()
-    {
-        Debug.Log($"[Axis {axisNo}] Error Reset");
-        _lastError = MotionError.None;
-        _currentState = AxisState.Standby;
-        _targetSpeedUser = 0;
-        _currentVelocityUser = 0;
-    }
+    private void StopJog() { if (_currentState == AxisState.Jogging) _targetSpeedMM = 0; }
+    public void RaiseError(MotionError e) { _lastError = e; _currentState = AxisState.Error; Debug.LogError($"[Axis {axisNo}] Error: {e}"); }
     #endregion
+
+    // [Unity Editor Magic] OnValidate: 인스펙터 값이 변경될 때 호출됨
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        // MotionParameter는 MonoBehaviour가 아니므로 자동 호출되지 않음.
+        // ServoAmp가 변화를 감지하여 parameter의 값을 강제로 보정(Snap)함.
+        if (parameter != null)
+        {
+            if (parameter.unitMagnification >= 1000)
+                parameter.unitMagnification = 1000;
+            else if (parameter.unitMagnification >= 100)
+                parameter.unitMagnification = 100;
+            else if (parameter.unitMagnification >= 10)
+                parameter.unitMagnification = 10;
+            else
+                parameter.unitMagnification = 1;
+        }
+    }
+#endif
 }

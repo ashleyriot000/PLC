@@ -10756,58 +10756,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1565420673}
   m_CullTransparentMesh: 1
---- !u!1 &1574074451
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1574074453}
-  - component: {fileID: 1574074452}
-  m_Layer: 0
-  m_Name: QD75MS4
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1574074452
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574074451}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0275cfbbba2be4c498ab8a868bf28302, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startIO_Hex: 50
-  _yStartCmdAddr: 
-  _xStartAddr: 
-  monitorAreaStartAddr: 800
-  commandAreaStartAddr: 1500
-  bufferSizePerAxis: 100
-  axes:
-  - {fileID: 232685062}
---- !u!4 &1574074453
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574074451}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1577253079
 GameObject:
   m_ObjectHideFlags: 0
@@ -12969,6 +12917,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1784368752}
   m_CullTransparentMesh: 1
+--- !u!1 &1789295670
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1789295672}
+  - component: {fileID: 1789295671}
+  m_Layer: 0
+  m_Name: QD77MS4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1789295671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1789295670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0275cfbbba2be4c498ab8a868bf28302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startIO_Hex: 50
+  _ySystemCmdAddr: 
+  _yAxisCmdAddr: 
+  _xStartAddr: 
+  monitorAreaStartAddr: 800
+  commandAreaStartAddr: 1500
+  bufferSizePerAxis: 100
+  communicationInterval: 0.05
+  axes:
+  - {fileID: 232685062}
+--- !u!4 &1789295672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1789295670}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.0304322, y: 0.5, z: -1.2514642}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1806805533
 GameObject:
   m_ObjectHideFlags: 0
@@ -15583,6 +15585,22 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: parameter.inPosWidth
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: parameter.ballscrewLead
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: parameter.motorResolution
+      value: 41925140
+      objectReference: {fileID: 0}
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: parameter.unitMagnification
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: positioningDataList.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -15620,11 +15638,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: positioningDataList.Array.data[0].posAddress
-      value: 100
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: positioningDataList.Array.data[1].posAddress
-      value: -100
+      value: -1000
       objectReference: {fileID: 0}
     - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: positioningDataList.Array.data[0].commandSpeed
@@ -15645,6 +15663,10 @@ PrefabInstance:
     - target: {fileID: 738429123356641848, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: m_Name
       value: PHMC120-S-50-S40-L-W
+      objectReference: {fileID: 0}
+    - target: {fileID: 738429123356641848, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3751163112150269830, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -16841,4 +16863,4 @@ SceneRoots:
   - {fileID: 1717892052}
   - {fileID: 2042277148084978794}
   - {fileID: 1185173314}
-  - {fileID: 1574074453}
+  - {fileID: 1789295672}
