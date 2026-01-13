@@ -63,11 +63,6 @@ public class SimpleMotionModule : MXObject
         _isCommandExecuted = new bool[axes.Length];
     }
 
-    private void Start()
-    {
-        if (axes.Length > 0) Debug.Log(">>> 통신 시작 (2-Word Split Mode) <<<");
-    }
-
     private void Update()
     {
         if (axes.Length == 0) return;

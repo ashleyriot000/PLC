@@ -5,33 +5,62 @@ using System.Linq;
 
 public class ServoAmp : MonoBehaviour
 {
-    #region 1. Hardware Setup
+    #region Custom Struck
+    [Serializable]
+    public struct PositioningData
+    {
+        public int stepNo;                                      //스텝 No.
+        public OperationPattern pattern;                 //포지셔닝 패턴
+        public ControlMethodType controlMethod;    //제어 방식
+        public double accelTime;                            //가속시간(ms) => 초(/1000)
+        public double decelTime;                            //감속시간(ms) => 초(/1000)
+        public double posAddress;                           //목적위치(um) => m(/unitMagnification/1000)
+        public double arcAddress;                           //아크위치(um) => m(/unitMagnification/1000)
+        public double commandSpeed;                    //지령속도(mm/분) => m/초(/60000)
+        public double dwellTime;                            //대기시간(ms) => 초(/1000)
+        public double mCode;
+    }
+    #endregion
+
+    #region Hardware Setup
     [Header("Physics Components")]
     public Rigidbody movingPart;
     public ConfigurableJoint driveJoint;
 
-    [Header("Sensors")]
-    public MagneticSensor sensorFLS;
-    public MagneticSensor sensorRLS;
-    public MagneticSensor sensorDOG;
-
     [Header("Axis Settings")]
     public int axisNo = 1;
-    public MotionParameter parameter = new ();
-    public List<PositioningData> positioningDataList = new();
-    #endregion
+    [Tooltip("PLC 단위 배율 => x1(0.1um), x10(1um), x100(10um), x1000(100um)")]
+    [SerializeField] private int unitMagnification = 1; //단위 배율 - x1(0.1um), x10(1um), x100(10um), x1000(100um)
+    [SerializeField] private ActuatorType actuatorType = ActuatorType.Linear;     //액츄에이터 타입
+    [SerializeField] private UnitType usedUnit = UnitType.MM;                     //기본 단위
+    [SerializeField] private double motorResolution = 4194304d;                 //분해능
+    [SerializeField] private double ballscrewLead = 2000.0;                        //1회전당 전진 길이(um)
+    [SerializeField] private double gearRatio = 1.0d;                                  //기어비
+    [SerializeField] private double speedLimit = 2000.0d;                             //최대 스피드(mm/분) -> m/초(/60000)
+    [SerializeField] private double inPosWidth = 10.0d;                               //도착 허용 범위(um) -> m(/1000000)
+    [SerializeField] private double jogSpeedLimit = 2000.0d;                       //JOG 최대 스피드(mm/분) -> m/초(/60000)
+    [SerializeField] private double jogAccelTime = 500d;                              //JOG 가속속도(ms) -> 초(/1000)
+    [SerializeField] private double jogdecelTime = 500d;                              //JOG 감속속도(ms) -> 초(/1000)
+    [SerializeField] private int defaultHomingDirection = 1;                          //기본 원점 복귀 방향 1:정방향, -1:역방향
+    [SerializeField] private double homingHighSpeed = 2000.0d;                 //원점 복귀 최대 속도(mm/분) -> m/초(/60000)
+    [SerializeField] private double homingCreepSpeed = 2000.0d;               //원점 복귀 정밀 속도(mm/분) -> m/초(/60000)
+    [SerializeField] private double homingAccelTime = 1000d;                     //원점 복귀 가속 시간(ms) -> 초(/1000)
+    [SerializeField] private double homingDecelTime = 1000d;                     //원점 복귀 감속 시간(ms) -> 초(/1000)
+    #endregion    
 
-    #region 2. Internal State
+    #region 2. State
     [Header("Status Monitor")]
-    [SerializeField] private bool _isServoOn = false; // 서보 상태
-    [SerializeField] private AxisState _currentState = AxisState.Standby;
-    [SerializeField] private MotionError _lastError = MotionError.None;
-
-    [SerializeField] private int _currentPositionRaw = 0;
-    [SerializeField] private int _currentSpeedRaw = 0;
+    [SerializeField] private bool _isServoOn = false;                                       //서보 준비 상태
+    [SerializeField] private AxisState _currentState = AxisState.Off;               //현재 서보 상태
+    [SerializeField] private MotionError _lastError = MotionError.None;           //최근 에러
+    [SerializeField] private int _currentPositionRaw = 0;                               //현재 위치(PLC기준)
+    [SerializeField] private int _currentSpeedRaw = 0;                                 //현재 속도(PLC기준)
+    [SerializeField] private List<PositioningData> positioningDataList = new();
 
     // 내부 물리 연산용 (mm 단위)
+    private double _unitMultiplier = 0d;
     private double _currentPositionMM = 0d;
+    private double _homingPositionOffset = 0d;
     private double _currentVelocityMM = 0d;
 
     private double _commandPositionMM = 0d;
@@ -42,23 +71,56 @@ public class ServoAmp : MonoBehaviour
     private double _activeDecelTime = 0d;
     private int _homingSequenceStep = 0;
 
-    // 센서 상태 캐싱
-    private bool _signalFLS = false;
-    private bool _signalRLS = false;
-    private bool _signalDOG = false;
+    private bool _isOnFLS = false;
+    private bool _isOnRLS = false;
+    private bool _isOnDOG = false;
     #endregion
 
-    #region 3. Properties
+    #region Properties
     public int CurrentPulse => _currentPositionRaw;
+    public double CurrentPosition => _currentPositionMM + _homingPositionOffset;
     public bool IsBusy => _currentState != AxisState.Standby && _currentState != AxisState.Error;
     public bool IsError => _currentState == AxisState.Error;
     public short ErrorCode => (short)_lastError;
     public bool IsServoOn => _isServoOn;
+    public double RawToMeter(double rawValue) => rawValue * _unitMultiplier * 0.001d;
+
+    
+
+    public bool IsOnFLS
+    {
+        get => _isOnFLS;
+        set
+        {
+            _isOnFLS = value;
+        }
+        //if (isOn && _currentVelocityMM > 0)
+        //    RaiseError(MotionError.HardwareStrokeLimit);
+    }
+    public bool IsOnRLS
+    {
+        get => _isOnRLS;
+        set
+        {
+            _isOnRLS = value;
+        }
+        //if (isOn && _currentVelocityMM < 0)
+        //    RaiseError(MotionError.HardwareStrokeLimit);
+    }
+    public bool IsOnDOG
+    {
+        get => _isOnDOG;
+        set
+        {
+            _isOnDOG = value;
+        }
+    }
     #endregion
 
     #region 4. Unity Methods
     private void Awake()
     {
+        _unitMultiplier = 10000.0d / unitMagnification;
         if (movingPart == null) 
             movingPart = GetComponent<Rigidbody>();
 
@@ -66,41 +128,34 @@ public class ServoAmp : MonoBehaviour
         {
             movingPart.automaticCenterOfMass = false;
             movingPart.automaticInertiaTensor = false;
+            movingPart.mass = 10f;
+            movingPart.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            movingPart.interpolation = RigidbodyInterpolation.Interpolate;
         }
-
 
         if (driveJoint == null) 
             driveJoint = GetComponent<ConfigurableJoint>();
 
-        if(driveJoint != null)
+        if (driveJoint != null)
         {
-            driveJoint.xMotion = parameter.actuatorType == ActuatorType.Linear ? 
+            driveJoint.secondaryAxis = -Vector3.up;
+
+            driveJoint.xMotion = actuatorType == ActuatorType.Linear ? 
                 ConfigurableJointMotion.Free : ConfigurableJointMotion.Locked;
 
             driveJoint.yMotion = ConfigurableJointMotion.Locked;
             driveJoint.zMotion = ConfigurableJointMotion.Locked;
 
-            driveJoint.angularXMotion = parameter.actuatorType == ActuatorType.Rotary ?
+            driveJoint.angularXMotion = actuatorType == ActuatorType.Rotary ?
                 ConfigurableJointMotion.Free : ConfigurableJointMotion.Locked;
             driveJoint.angularYMotion = ConfigurableJointMotion.Locked;
             driveJoint.angularZMotion = ConfigurableJointMotion.Locked;
+
         }
 
-        UnlockJointMotion();
-        SetupJointPhysics();
-
         // 런타임 초기화
-        _currentPositionMM = GetPhysicalPositionMM();
-        _currentPositionRaw = MMToRaw(_currentPositionMM);
-        _commandPositionMM = _currentPositionMM;
-    }
-
-    private void Start()
-    {
-        if (sensorFLS != null) sensorFLS.onChangedDetect.AddListener(OnChangedFLS);
-        if (sensorRLS != null) sensorRLS.onChangedDetect.AddListener(OnChangedRLS);
-        if (sensorDOG != null) sensorDOG.onChangedDetect.AddListener(OnChangedDOG);
-    }
+        SetServoOn(false);        
+    }    
 
     private void FixedUpdate()
     {
@@ -136,48 +191,55 @@ public class ServoAmp : MonoBehaviour
     {
         if (_isServoOn == isOn) return;
 
-        _isServoOn = isOn;
-        if (_isServoOn)
+        if (_isServoOn = isOn)
         {
             Debug.Log($"[Axis {axisNo}] Servo ON");
             _commandPositionMM = _currentPositionMM; // 켜지는 순간 위치 고정
             _currentState = AxisState.Standby;
             _lastError = MotionError.None;
-            if (movingPart != null) movingPart.isKinematic = false;
+            SetupJointPhysics(100000f);
         }
         else
         {
             Debug.Log($"[Axis {axisNo}] Servo OFF");
-            _currentState = AxisState.Standby;
+            _currentState = AxisState.Off;
+            _currentPositionMM = GetPhysicalPositionMM();
+            _homingPositionOffset = 0f;
+            _currentPositionRaw = MMToRaw(_currentPositionMM);
+            _commandPositionMM = _currentPositionMM;
             _targetSpeedMM = 0;
+            SetupJointPhysics(20f);
         }
     }
     #endregion
 
     #region 6. Helper Functions
     // [단위 변환] Property 사용 (자동 계산)
-    private double RawToMM(double rawValue) => rawValue * parameter.UnitMultiplier;
+    private double RawToMM(double rawValue) => rawValue / _unitMultiplier;
+    private int MMToRaw(double mmValue) => (int)(mmValue * _unitMultiplier);
+    private double MmToUm(double mmValue) => mmValue * 1000d;
+    private double UmToMm(double umValue) => umValue * 0.001d;
+    private double ToMeterPerSeconds(double MmPerMin) => MmPerMin * 60000d;
 
-    private int MMToRaw(double mmValue)
+    //전자기어비 구하는 메서드(1펄스당 이동거리 혹은 이동각)
+    public double GetPulseRatio()
     {
-        if (parameter.UnitMultiplier <= 1e-9) return 0;
-        return (int)(mmValue / parameter.UnitMultiplier);
+        if (usedUnit == UnitType.Pulse) return 1.0d;
+        double limitVal = ballscrewLead;
+        if (actuatorType == ActuatorType.Rotary && usedUnit == UnitType.Degree) limitVal = 360.0d;
+        return (motorResolution * gearRatio) / limitVal;
     }
 
     private double GetPhysicalPositionMM()
     {
-        if (driveJoint == null) return 0;
-        float val = (parameter.actuatorType == ActuatorType.Linear) ?
-            driveJoint.transform.localPosition.x : driveJoint.transform.localEulerAngles.x;
-        return (parameter.actuatorType == ActuatorType.Linear) ? val * 1000d : val;
+        return (actuatorType == ActuatorType.Linear) ? 
+            driveJoint.transform.localPosition.x * 1000d : 
+            driveJoint.transform.localEulerAngles.x;
     }
 
     private void ApplyPhysicsTarget(double posMM)
     {
-        if (driveJoint == null) return;
-        if (movingPart.IsSleeping()) movingPart.WakeUp();
-
-        if (parameter.actuatorType == ActuatorType.Linear)
+        if (actuatorType == ActuatorType.Linear)
         {
             float unityTarget = (float)(posMM / 1000d);
             driveJoint.targetPosition = new Vector3(unityTarget, 0, 0);
@@ -188,46 +250,33 @@ public class ServoAmp : MonoBehaviour
         }
     }
 
-    private void UnlockJointMotion()
+    private void SetupJointPhysics(float spring)
     {
-        if (driveJoint == null) return;
-        if (parameter.actuatorType == ActuatorType.Linear)
-        {
-            driveJoint.xMotion = ConfigurableJointMotion.Free;
-            driveJoint.yMotion = ConfigurableJointMotion.Locked;
-            driveJoint.zMotion = ConfigurableJointMotion.Locked;
-            driveJoint.angularXMotion = ConfigurableJointMotion.Locked;
-            driveJoint.angularYMotion = ConfigurableJointMotion.Locked;
-            driveJoint.angularZMotion = ConfigurableJointMotion.Locked;
-        }
-        else
-        {
-            driveJoint.angularXMotion = ConfigurableJointMotion.Free;
-            driveJoint.xMotion = ConfigurableJointMotion.Locked;
-        }
-        if (movingPart != null) movingPart.isKinematic = false;
-    }
+        JointDrive drive = new JointDrive 
+        { 
+            positionSpring = spring, 
+            positionDamper = 1000f, 
+            maximumForce = float.MaxValue 
+        };
 
-    private void SetupJointPhysics()
-    {
-        if (driveJoint == null) return;
-        JointDrive drive = new JointDrive { positionSpring = 1000000f, positionDamper = 1000f, maximumForce = float.MaxValue };
-        if (parameter.actuatorType == ActuatorType.Linear) driveJoint.xDrive = drive;
-        else driveJoint.angularXDrive = drive;
+        if (actuatorType == ActuatorType.Linear) 
+            driveJoint.xDrive = drive;
+        else 
+            driveJoint.angularXDrive = drive;
     }
     #endregion
 
     #region 7. Motion Logic
     private void CheckHardwareLimits()
     {
-        if (_targetSpeedMM > 0 && _signalFLS) RaiseError(MotionError.HardwareStrokeLimit);
-        if (_targetSpeedMM < 0 && _signalRLS) RaiseError(MotionError.HardwareStrokeLimit);
+        if (_targetSpeedMM > 0 && _isOnFLS) RaiseError(MotionError.HardwareStrokeLimit);
+        if (_targetSpeedMM < 0 && _isOnRLS) RaiseError(MotionError.HardwareStrokeLimit);
     }
 
     private void UpdateProfileLogic()
     {
         double targetSpeedSec = _targetSpeedMM / 60d;
-        double speedLimitSec = (parameter.speedLimit * parameter.UnitMultiplier) / 60d;
+        double speedLimitSec = (speedLimit * _unitMultiplier) / 60d;
 
         if (_currentState == AxisState.Positioning)
         {
@@ -243,7 +292,7 @@ public class ServoAmp : MonoBehaviour
 
         _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, (float)targetSpeedSec, (float)maxChange);
 
-        double inPosMM = parameter.inPosWidth * parameter.UnitMultiplier;
+        double inPosMM = inPosWidth * _unitMultiplier;
         if (_currentState == AxisState.Positioning &&
             Math.Abs(_finalTargetPosMM - _commandPositionMM) < inPosMM &&
             Math.Abs(_currentVelocityMM) < 0.01d)
@@ -261,27 +310,25 @@ public class ServoAmp : MonoBehaviour
 
     private void UpdateHomingLogic()
     {
-        double highSpeed = parameter.homingHighSpeed * parameter.UnitMultiplier;
-        double creepSpeed = parameter.homingCreepSpeed * parameter.UnitMultiplier;
-        double highSpeedSec = highSpeed / 60d;
-        double creepSpeedSec = creepSpeed / 60d;
-        int dir = parameter.defaultHomingDirection;
+        double highSpeed = ToMeterPerSeconds(homingHighSpeed);
+        double creepSpeed = ToMeterPerSeconds(homingCreepSpeed);
+        int dir = defaultHomingDirection;
 
         switch (_homingSequenceStep)
         {
             case 0:
                 _targetSpeedMM = highSpeed * dir;
-                UpdateVelocityAndPos(highSpeedSec * dir, parameter.homingAccelTime);
-                if (_signalDOG) _homingSequenceStep = 1;
+                UpdateVelocityAndPos(highSpeed * dir, homingAccelTime);
+                if (_isOnDOG) _homingSequenceStep = 1;
                 break;
             case 1:
                 _targetSpeedMM = creepSpeed * dir;
-                UpdateVelocityAndPos(creepSpeedSec * dir, parameter.homingDecelTime);
-                if (!_signalDOG) _homingSequenceStep = 2;
+                UpdateVelocityAndPos(creepSpeed * dir, homingDecelTime);
+                if (!_isOnDOG) _homingSequenceStep = 2;
                 break;
             case 2:
                 _targetSpeedMM = 0;
-                double limitSec = (parameter.speedLimit * parameter.UnitMultiplier) / 60d;
+                double limitSec = ToMeterPerSeconds(speedLimit);
                 double stopDecel = (limitSec / 0.05d) * Time.fixedDeltaTime;
                 _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, 0f, (float)stopDecel);
                 _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
@@ -297,15 +344,13 @@ public class ServoAmp : MonoBehaviour
 
     private void UpdateVelocityAndPos(double targetVelSec, double timeMs)
     {
-        double limitSec = (parameter.speedLimit * parameter.UnitMultiplier) / 60d;
+        double limitSec = ToMeterPerSeconds(speedLimit);
         double step = (limitSec / (timeMs / 1000d)) * Time.fixedDeltaTime;
         _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, (float)targetVelSec, (float)step);
         _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
     }
 
-    public void OnChangedFLS(bool d) { _signalFLS = d; if (d && _currentVelocityMM > 0) RaiseError(MotionError.HardwareStrokeLimit); }
-    public void OnChangedRLS(bool d) { _signalRLS = d; if (d && _currentVelocityMM < 0) RaiseError(MotionError.HardwareStrokeLimit); }
-    public void OnChangedDOG(bool d) { _signalDOG = d; }
+    
     #endregion
 
     #region 8. Commands (External)
@@ -325,9 +370,9 @@ public class ServoAmp : MonoBehaviour
 
         _currentState = AxisState.Positioning;
 
-        double scaledPos = data.posAddress * parameter.UnitMultiplier;
-        double scaledSpeed = data.commandSpeed * parameter.UnitMultiplier;
-        double scaledLimit = parameter.speedLimit * parameter.UnitMultiplier;
+        double scaledPos = data.posAddress * _unitMultiplier;
+        double scaledSpeed = data.commandSpeed * _unitMultiplier;
+        double scaledLimit = speedLimit * _unitMultiplier;
 
         Debug.Log($"[Axis {axisNo}] Start Pos No.{stepNo} (Raw:{data.posAddress} -> MM:{scaledPos:F3})");
 
@@ -365,33 +410,31 @@ public class ServoAmp : MonoBehaviour
     private void StartJog(bool isForward)
     {
         _currentState = AxisState.Jogging;
-        double scaledJogSpeed = parameter.jogSpeedLimit * parameter.UnitMultiplier;
+        double scaledJogSpeed = jogSpeedLimit;
         _targetSpeedMM = isForward ? scaledJogSpeed : -scaledJogSpeed;
-        _activeAccelTime = parameter.jogAccelTime;
-        _activeDecelTime = parameter.jogdecelTime;
+        _activeAccelTime = jogAccelTime;
+        _activeDecelTime = jogdecelTime;
     }
 
     private void StopJog() { if (_currentState == AxisState.Jogging) _targetSpeedMM = 0; }
     public void RaiseError(MotionError e) { _lastError = e; _currentState = AxisState.Error; Debug.LogError($"[Axis {axisNo}] Error: {e}"); }
+
     #endregion
 
     // [Unity Editor Magic] OnValidate: 인스펙터 값이 변경될 때 호출됨
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // MotionParameter는 MonoBehaviour가 아니므로 자동 호출되지 않음.
-        // ServoAmp가 변화를 감지하여 parameter의 값을 강제로 보정(Snap)함.
-        if (parameter != null)
-        {
-            if (parameter.unitMagnification >= 1000)
-                parameter.unitMagnification = 1000;
-            else if (parameter.unitMagnification >= 100)
-                parameter.unitMagnification = 100;
-            else if (parameter.unitMagnification >= 10)
-                parameter.unitMagnification = 10;
-            else
-                parameter.unitMagnification = 1;
-        }
+        if (unitMagnification >= 1000)
+            unitMagnification = 1000;
+        else if (unitMagnification >= 100)
+            unitMagnification = 100;
+        else if (unitMagnification >= 10)
+            unitMagnification = 10;
+        else
+            unitMagnification = 1;
+
+        _unitMultiplier = 10000.0d / unitMagnification;
     }
 #endif
 }

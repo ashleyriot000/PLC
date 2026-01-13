@@ -1,5 +1,58 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &107652122380142673
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7557922008471032965}
+  - component: {fileID: 1846804429946434109}
+  m_Layer: 0
+  m_Name: ForwardLimit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7557922008471032965
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107652122380142673}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0.012, z: 1.396}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6595617769462537874}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1846804429946434109
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107652122380142673}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08, y: 0.06, z: 0.09}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &212898075808464121
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,10 +179,21 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   detectableName: 
-  sensorAddress: 
   onChangedDetect:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 79333881236584881}
+        m_TargetAssemblyTypeName: ServoAmp, Assembly-CSharp
+        m_MethodName: OnChangedDOG
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &738429123356641848
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,6 +205,7 @@ GameObject:
   - component: {fileID: 3751163112150269830}
   - component: {fileID: 3163459621890685581}
   - component: {fileID: 3615998458165788028}
+  - component: {fileID: 8352570228541341446}
   m_Layer: 0
   m_Name: PHMC120-S-50-S40-L-W
   m_TagString: Untagged
@@ -156,7 +221,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 738429123356641848}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -1.135, y: 0.658, z: -1.095}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -164,6 +229,7 @@ Transform:
   - {fileID: 8353201041826853899}
   - {fileID: 5495789225895246447}
   - {fileID: 2644701198313117250}
+  - {fileID: 6595617769462537874}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!33 &3163459621890685581
@@ -219,6 +285,33 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!54 &8352570228541341446
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738429123356641848}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1093101438567815896
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,10 +558,21 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   detectableName: 
-  sensorAddress: 
   onChangedDetect:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 79333881236584881}
+        m_TargetAssemblyTypeName: ServoAmp, Assembly-CSharp
+        m_MethodName: OnChangedFLS
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2202381675184642540
 GameObject:
   m_ObjectHideFlags: 0
@@ -934,6 +1038,59 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5877706725392746603
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 329492604731875250}
+  - component: {fileID: 7106257968832714000}
+  m_Layer: 0
+  m_Name: ReverseLimit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &329492604731875250
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5877706725392746603}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.012, z: 0.053}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6595617769462537874}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7106257968832714000
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5877706725392746603}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08, y: 0.06, z: 0.09}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6368993977702825816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1234,10 +1391,21 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   detectableName: 
-  sensorAddress: 
   onChangedDetect:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 79333881236584881}
+        m_TargetAssemblyTypeName: ServoAmp, Assembly-CSharp
+        m_MethodName: OnChangedRLS
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7498156701221336727
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,7 +1523,7 @@ Transform:
   m_GameObject: {fileID: 7656469630606598343}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0.2775}
+  m_LocalPosition: {x: 0, y: 0, z: 1.3139}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1381,7 +1549,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.01, y: 0.05, z: 0.12}
+  m_Size: {x: 0.01, y: 0.07, z: 0.12}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &1835567794819724135
 Rigidbody:
@@ -1407,9 +1575,9 @@ Rigidbody:
   m_ImplicitTensor: 0
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!153 &5334069338243142911
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -1418,13 +1586,13 @@ ConfigurableJoint:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7656469630606598343}
   serializedVersion: 4
-  m_ConnectedBody: {fileID: 0}
+  m_ConnectedBody: {fileID: 8352570228541341446}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  m_SecondaryAxis: {x: 0, y: 1, z: 0}
+  m_SecondaryAxis: {x: 0, y: -1, z: 0}
   m_XMotion: 2
   m_YMotion: 2
   m_ZMotion: 2
@@ -1464,8 +1632,8 @@ ConfigurableJoint:
   m_TargetVelocity: {x: 0, y: 0, z: 0}
   m_XDrive:
     serializedVersion: 4
-    positionSpring: 0
-    positionDamper: 0
+    positionSpring: 10
+    positionDamper: 1000
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_YDrive:
@@ -1508,7 +1676,7 @@ ConfigurableJoint:
   m_SwapBodies: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
-  m_EnableCollision: 0
+  m_EnableCollision: 1
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
@@ -1524,47 +1692,81 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43788265bde1ce64e850751716db738a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movingPartRb: {fileID: 0}
+  movingPart: {fileID: 0}
   driveJoint: {fileID: 0}
-  sensorFLS: {fileID: 5324950235550895776}
-  sensorRLS: {fileID: 9087660896680563766}
-  sensorDOG: {fileID: 6123463324029270576}
   axisNo: 1
-  parameter:
-    actuatorType: 0
-    usedUnit: 0
-    motorResolution: 131072
-    ballscrewLead: 2
-    gearRatio: 1
-    speedLimit: 2000
-    accelTimes:
-    - 1000
-    - 1000
-    - 1000
-    - 1000
-    decelTimes:
-    - 1000
-    - 1000
-    - 1000
-    - 1000
-    inPosWidth: 0.01
-    jogSpeedLimit: 200
-    jogAccelTime: 500
-    jogdecelTime: 500
-    useForceStop: 0
-    inPositionDuration: 0.1
-    homingType: 1
-    defaultHomingDirection: -1
-    homingHighSpeed: 200
-    homingCreepSpeed: 20
-    homingAccelTime: 1000
-    homingDecelTime: 1000
-  positioningDataList: []
+  unitMagnification: 1
+  actuatorType: 0
+  usedUnit: 0
+  motorResolution: 4194304
+  ballscrewLead: 2000
+  gearRatio: 1
+  speedLimit: 2000
+  inPosWidth: 10
+  jogSpeedLimit: 2000
+  jogAccelTime: 500
+  jogdecelTime: 500
+  defaultHomingDirection: 1
+  homingHighSpeed: 2000
+  homingCreepSpeed: 2000
+  homingAccelTime: 1000
+  homingDecelTime: 1000
+  _isServoOn: 0
   _currentState: 0
   _lastError: 0
-  _signalFLS: 0
-  _signalRLS: 0
-  _signalDOG: 0
-  _currentPosition: 0
-  _currentVelocity: 0
-  _currentPulse: 0
+  _currentPositionRaw: 0
+  _currentSpeedRaw: 0
+  positioningDataList:
+  - stepNo: 1
+    pattern: 0
+    controlMethod: 1
+    accelTime: 1000
+    decelTime: 1000
+    posAddress: 1000
+    arcAddress: 0
+    commandSpeed: 2000
+    dwellTime: 20
+    mCode: 0
+  - stepNo: 2
+    pattern: 0
+    controlMethod: 1
+    accelTime: 1000
+    decelTime: 1000
+    posAddress: -1000
+    arcAddress: 0
+    commandSpeed: 2000
+    dwellTime: 20
+    mCode: 0
+--- !u!1 &8826637334877391580
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6595617769462537874}
+  m_Layer: 0
+  m_Name: HardwareLimit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6595617769462537874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8826637334877391580}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7557922008471032965}
+  - {fileID: 329492604731875250}
+  m_Father: {fileID: 3751163112150269830}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

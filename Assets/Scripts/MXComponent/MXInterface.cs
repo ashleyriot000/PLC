@@ -139,8 +139,12 @@ public sealed class MXInterface : IDisposable
     }
     public void Dispose()
     {
-        _worker.Abort();
-        _worker = null;
+        if( _worker != null )
+        {
+            _worker.Abort();
+            _worker = null;
+        }  
+            
         _autoReadDatas = null;
         GC.SuppressFinalize(this);
     }
