@@ -184,7 +184,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 79333881236584881}
         m_TargetAssemblyTypeName: ServoAmp, Assembly-CSharp
-        m_MethodName: OnChangedDOG
+        m_MethodName: set_IsOnDOG
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -563,7 +563,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 79333881236584881}
         m_TargetAssemblyTypeName: ServoAmp, Assembly-CSharp
-        m_MethodName: OnChangedFLS
+        m_MethodName: set_IsOnFLS
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1396,7 +1396,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 79333881236584881}
         m_TargetAssemblyTypeName: ServoAmp, Assembly-CSharp
-        m_MethodName: OnChangedRLS
+        m_MethodName: set_IsOnRLS
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1695,31 +1695,33 @@ MonoBehaviour:
   movingPart: {fileID: 0}
   driveJoint: {fileID: 0}
   axisNo: 1
-  unitMagnification: 1
-  actuatorType: 0
-  usedUnit: 0
-  motorResolution: 4194304
-  ballscrewLead: 2000
-  gearRatio: 1
-  speedLimit: 2000
-  inPosWidth: 10
-  jogSpeedLimit: 2000
-  jogAccelTime: 500
-  jogdecelTime: 500
-  defaultHomingDirection: 1
-  homingHighSpeed: 2000
-  homingCreepSpeed: 2000
-  homingAccelTime: 1000
-  homingDecelTime: 1000
+  _unitMagnification: 10
+  _actuatorType: 0
+  _unitSetting: 0
+  _motorResolution: 4194304
+  _ballscrewLead: 5000
+  _gearRatio: 1
+  _speedLimit: 2000
+  _inPosWidth: 10
+  _jogSpeedLimit: 2000
+  _jogAccelTime: 500
+  _jogdecelTime: 500
+  _hprRetryType: 0
+  _defaultHprDirection: 1
+  _hprHighSpeed: 2000
+  _hprCreepSpeed: 2000
+  _hprAccelTime: 1000
+  _hprDecelTime: 1000
   _isServoOn: 0
   _currentState: 0
   _lastError: 0
   _currentPositionRaw: 0
+  _hprOffestRaw: 0
   _currentSpeedRaw: 0
   positioningDataList:
   - stepNo: 1
     pattern: 0
-    controlMethod: 1
+    controlMethod: 2
     accelTime: 1000
     decelTime: 1000
     posAddress: 1000
@@ -1729,7 +1731,7 @@ MonoBehaviour:
     mCode: 0
   - stepNo: 2
     pattern: 0
-    controlMethod: 1
+    controlMethod: 2
     accelTime: 1000
     decelTime: 1000
     posAddress: -1000

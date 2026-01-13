@@ -114,6 +114,8 @@ public class SimpleMotionModule : MXObject
             if (!_isModuleReady) continue;
 
             int startBit = i;
+            int offset = i * bufferSizePerAxis;
+            int startNo = data[offset + 0];
             bool isStartOn = (_yAxisCache & (1 << startBit)) != 0;
 
             int jogFwdBit = 6 + (i * 2);
@@ -122,10 +124,7 @@ public class SimpleMotionModule : MXObject
             bool isJogFwd = (_yAxisCache & (1 << jogFwdBit)) != 0;
             bool isJogRev = (_yAxisCache & (1 << jogRevBit)) != 0;
 
-            axes[i].ProcessJog(isJogFwd, isJogRev);
-
-            int offset = i * bufferSizePerAxis;
-            int startNo = data[offset + 0];
+            axes[i].CommandJog(isJogFwd, isJogRev, data[offset + 18]);
 
             if (isStartOn)
             {
@@ -141,6 +140,12 @@ public class SimpleMotionModule : MXObject
             else
             {
                 _isCommandExecuted[i] = false;
+            }
+
+            int resetNo = data[offset + 2];
+            if(resetNo > 0)
+            {
+                axes[i].ResetAxis();
             }
         }
 
