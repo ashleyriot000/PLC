@@ -1704,13 +1704,13 @@ MonoBehaviour:
   _gearRatio: 1
   _speedLimit: 2000
   _inPosWidth: 10
-  _jogSpeedLimit: 200
+  _jogSpeedLimit: 500
   _jogAccelTime: 1000
   _jogdecelTime: 1000
   _hprRetryType: 1
   _defaultHprDirection: 1
-  _hprHighSpeed: 200
-  _hprCreepSpeed: 50
+  _hprHighSpeed: 250
+  _hprCreepSpeed: 100
   _hprAccelTime: 1000
   _hprDecelTime: 1000
   _isServoOn: 0
@@ -1718,7 +1718,7 @@ MonoBehaviour:
   _lastError: 0
   _currentPositionMM: 0
   _currentPositionRaw: 0
-  _currentVelocityMM: 0
+  _currentSpeedMM: 0
   _currentSpeedRaw: 0
   positioningDataList:
   - stepNo: 1
@@ -1726,7 +1726,7 @@ MonoBehaviour:
     controlMethod: 2
     accelTime: 1000
     decelTime: 1000
-    posAddress: 1000
+    posAddress: 500000
     arcAddress: 0
     commandSpeed: 2000
     dwellTime: 20
@@ -1736,7 +1736,7 @@ MonoBehaviour:
     controlMethod: 2
     accelTime: 1000
     decelTime: 1000
-    posAddress: -1000
+    posAddress: -500000
     arcAddress: 0
     commandSpeed: 2000
     dwellTime: 20

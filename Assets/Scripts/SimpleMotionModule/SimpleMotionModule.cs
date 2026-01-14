@@ -4,6 +4,40 @@ using System.Collections.Generic;
 
 public class SimpleMotionModule : MXObject
 {
+    [System.Flags]
+    public enum SystemFeedback : ushort
+    {
+        None = 0,
+        READY = 1,
+        SyncFLAG = 1 << 1,
+        MCode_Axis1 = 1 << 4,
+        MCode_Axis2 = 1 << 5,
+        MCode_Axis3 = 1 << 6,
+        MCode_Axis4 = 1 << 7,
+        ERROR_Axis1 = 1 << 8,
+        ERROR_Axis2 = 1 << 9,
+        ERROR_Axis3 = 1 << 10,
+        ERROR_Axis4 = 1 << 11,
+        BUSY_Axis1 = 1 << 12,
+        BUSY_Axis2 = 1 << 13,
+        BUSY_Axis3 = 1 << 14,
+        BUSY_Axis4 = 1 << 15,
+    }
+
+    [System.Flags]
+    public enum AxisFeedback : ushort
+    {
+        None = 0,        
+        READY_Axis1 = 1,
+        READY_Axis2 = 1 << 1,
+        READY_Axis3 = 1 << 2,
+        READY_Axis4 = 1 << 3,
+        InPosition_Axis1 = 1 << 4,
+        InPosition_Axis2 = 1 << 5,
+        InPosition_Axis3 = 1 << 6,
+        InPosition_Axis4 = 1 << 7,
+    }
+
     #region Settings
     [Header("Network Settings")]
     [Tooltip("모듈의 선두 I/O 번호 (Hex String, 예: 00, 20, 50)")]
@@ -13,7 +47,8 @@ public class SimpleMotionModule : MXObject
     [Header("PLC I/O Address (Auto Generated)")]
     [SerializeField] private string _ySystemCmdAddr;
     [SerializeField] private string _yAxisCmdAddr;
-    [SerializeField] private string _xStartAddr;
+    [SerializeField] private string _xSystemFeedbackAddr;
+    [SerializeField] private string _xAxisFeedbackAddr;
 
     [Header("Buffer Memory Settings")]
     public int monitorAreaStartAddr = 800;
@@ -36,8 +71,10 @@ public class SimpleMotionModule : MXObject
     private short _ySystemCache = 0;
     private short _yAxisCache = 0;
 
+    private SystemFeedback _xSystemFeedback = SystemFeedback.SyncFLAG;
+    private AxisFeedback _xAxisFeedback = AxisFeedback.None;
+
     private bool[] _isCommandExecuted;
-    private bool _isModuleReady = false;
     #endregion
 
     private void Awake()
@@ -50,9 +87,12 @@ public class SimpleMotionModule : MXObject
         int axisYStart = rawAddress + 0x10;
         _yAxisCmdAddr = "K4Y" + axisYStart.ToString("X");
 
-        _xStartAddr = "K8X" + startIO_Hex;
-
         Debug.Log($"[Init] SysY:{_ySystemCmdAddr}, AxisY:{_yAxisCmdAddr}");
+
+        _xSystemFeedbackAddr = "K4X" + startIO_Hex;
+        int axisXStart = rawAddress + 0x10;
+        _xAxisFeedbackAddr = "K4X" + axisXStart.ToString("X");
+        Debug.Log($"[Init] SysX:{_xSystemFeedbackAddr},  AxisX:{_xAxisFeedbackAddr}");
 
         int totalSize = axes.Length * bufferSizePerAxis;
         if (totalSize > 0)
@@ -97,13 +137,21 @@ public class SimpleMotionModule : MXObject
 
     private void OnReadBufferCompleted(short[] data)
     {
-        if (data == null) { _isCommunicating = false; return; }
+        if (data == null) 
+        { 
+            _isCommunicating = false; 
+            return; 
+        }
 
         // Y0 (Ready), Y1 (ServoOn)
         bool plcReady = (_ySystemCache & 1) != 0;
         bool servoOn = (_ySystemCache & 2) != 0;
+       
+        if (plcReady)
+            _xSystemFeedback |= SystemFeedback.READY;
+        else
+            _xSystemFeedback &= ~SystemFeedback.READY;
 
-        _isModuleReady = plcReady;
 
         for (int i = 0; i < axes.Length; i++)
         {
@@ -111,7 +159,8 @@ public class SimpleMotionModule : MXObject
 
             axes[i].SetServoOn(servoOn);
 
-            if (!_isModuleReady) continue;
+            if (!axes[i].IsReady)
+                continue;
 
             int startBit = i;
             int offset = i * bufferSizePerAxis;
@@ -134,6 +183,7 @@ public class SimpleMotionModule : MXObject
                 {
                     if (startNo > 0)
                     {
+                        Debug.Log($"Executed => {startNo}");
                         axes[i].StartPositioning(startNo);
                         _isCommandExecuted[i] = true;
                     }
@@ -143,9 +193,10 @@ public class SimpleMotionModule : MXObject
             {
                 _isCommandExecuted[i] = false;
             }
+            
 
             int resetNo = data[offset + 2];
-            if(resetNo > 0)
+            if (resetNo > 0)
             {
                 axes[i].ResetAxis();
             }
@@ -156,10 +207,6 @@ public class SimpleMotionModule : MXObject
 
     private void PrepareWriteData()
     {
-        int xSignalBitmap = 0;
-
-        if (_isModuleReady) xSignalBitmap |= 1;
-
         for (int i = 0; i < axes.Length; i++)
         {
             if (axes[i] == null) continue;
@@ -171,12 +218,30 @@ public class SimpleMotionModule : MXObject
             _writeBufferCache[offset + 1] = (short)((currentPulse >> 16) & 0xFFFF);
             _writeBufferCache[offset + 6] = axes[i].ErrorCode;
 
-            if (axes[i].IsBusy) xSignalBitmap |= (1 << (0x10 + i));
-            if (axes[i].IsError) xSignalBitmap |= (1 << (0x18 + i));
+            if (axes[i].IsReady)
+                AddAxisFeedback((int)AxisFeedback.READY_Axis1 << i);
+            else
+                RemoveAxisFeedback(1 << i);
+
+            if (axes[i].IsError)
+                AddSystemFeedback((int)SystemFeedback.ERROR_Axis1 << i);
+            else
+                RemoveSystemFeedback((int)SystemFeedback.ERROR_Axis1 << i);
+
+            if (axes[i].IsBusy)
+                AddSystemFeedback((int)SystemFeedback.BUSY_Axis1 << i);
+            else
+                RemoveSystemFeedback((int)SystemFeedback.BUSY_Axis1 << i);
+
+            if (axes[i].InPosition)
+                AddAxisFeedback((int)AxisFeedback.InPosition_Axis1 << i);
+            else
+                RemoveAxisFeedback((int)AxisFeedback.InPosition_Axis1 << i);
         }
 
-        MXRequester.Get.AddBufferWrite(_startIO_Slot, monitorAreaStartAddr, _writeBufferCache, null);
-        MXRequester.Get.AddSetDeviceRequest(_xStartAddr, (short)xSignalBitmap, OnWriteCompleted);
+        MXRequester.Get.AddSetDeviceRequest(_xSystemFeedbackAddr, (short)_xSystemFeedback, null);
+        MXRequester.Get.AddSetDeviceRequest(_xAxisFeedbackAddr, (short)_xAxisFeedback, null);
+        MXRequester.Get.AddBufferWrite(_startIO_Slot, monitorAreaStartAddr, _writeBufferCache, OnWriteCompleted);
     }
 
     private void OnWriteCompleted(bool success)
@@ -184,4 +249,22 @@ public class SimpleMotionModule : MXObject
         _isCommunicating = false;
     }
     #endregion
+
+    public void AddSystemFeedback(int flags)
+    {
+        _xSystemFeedback |= (SystemFeedback)flags;
+    }
+    public void RemoveSystemFeedback(int flags)
+    {
+        _xSystemFeedback &= ~(SystemFeedback)flags;
+    }
+
+    public void AddAxisFeedback(int flags)
+    {
+        _xAxisFeedback |= (AxisFeedback)flags;
+    }
+    public void RemoveAxisFeedback(int flags)
+    {
+        _xAxisFeedback &= ~(AxisFeedback)flags;
+    }
 }

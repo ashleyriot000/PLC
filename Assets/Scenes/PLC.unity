@@ -21313,7 +21313,8 @@ MonoBehaviour:
   startIO_Hex: 50
   _ySystemCmdAddr: 
   _yAxisCmdAddr: 
-  _xStartAddr: 
+  _xSystemFeedbackAddr: 
+  _xAxisFeedbackAddr: 
   monitorAreaStartAddr: 800
   commandAreaStartAddr: 1500
   bufferSizePerAxis: 100
@@ -25043,6 +25044,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: positioningDataList.Array.data[1].posAddress
+      value: 1000000
+      objectReference: {fileID: 0}
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: positioningDataList.Array.data[0].controlMethod
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 79333881236584881, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
+      propertyPath: positioningDataList.Array.data[1].controlMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 738429123356641848, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: m_Name
       value: PHMC120-S-50-S40-L-W
