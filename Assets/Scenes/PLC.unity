@@ -20948,7 +20948,7 @@ MonoBehaviour:
   _capacity: 100
   _stationNumber: 1
   _password: 
-  _useAutoConnect: 0
+  _useAutoConnect: 1
   _addressList: []
 --- !u!4 &1717892052
 Transform:
@@ -25053,7 +25053,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3751163112150269830, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.655
+      value: 1.227
       objectReference: {fileID: 0}
     - target: {fileID: 3751163112150269830, guid: 7d47efbf716be4e4b952557f5007999f, type: 3}
       propertyPath: m_LocalPosition.z

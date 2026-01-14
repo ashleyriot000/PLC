@@ -116,16 +116,18 @@ public class SimpleMotionModule : MXObject
             int startBit = i;
             int offset = i * bufferSizePerAxis;
             int startNo = data[offset + 0];
+
+            int jogFwdBit = 8 + (i * 2);
+            int jogRevBit = 9 + (i * 2);
+
+            bool isJogFwd = (_ySystemCache & (1 << jogFwdBit)) != 0;
+            bool isJogRev = (_ySystemCache & (1 << jogRevBit)) != 0;
+
+            int jogTargetSpeed = (data[offset + 19] << 16) | (ushort)data[offset + 18];
+
+            axes[i].CommandJog(isJogFwd, isJogRev, jogTargetSpeed);
+
             bool isStartOn = (_yAxisCache & (1 << startBit)) != 0;
-
-            int jogFwdBit = 6 + (i * 2);
-            int jogRevBit = 7 + (i * 2);
-
-            bool isJogFwd = (_yAxisCache & (1 << jogFwdBit)) != 0;
-            bool isJogRev = (_yAxisCache & (1 << jogRevBit)) != 0;
-
-            axes[i].CommandJog(isJogFwd, isJogRev, data[offset + 18]);
-
             if (isStartOn)
             {
                 if (!_isCommandExecuted[i])

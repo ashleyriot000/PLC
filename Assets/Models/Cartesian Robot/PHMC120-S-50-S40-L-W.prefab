@@ -1117,8 +1117,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6368993977702825816}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.655, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: -0.55170023, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1522,8 +1522,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7656469630606598343}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 1.3139}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -0, y: 0, z: 0.92}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1550,7 +1550,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.01, y: 0.07, z: 0.12}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0.1033, y: 0, z: 0}
 --- !u!54 &1835567794819724135
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1590,9 +1590,9 @@ ConfigurableJoint:
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
+  m_AutoConfigureConnectedAnchor: 0
   m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  m_SecondaryAxis: {x: 0, y: -1, z: 0}
+  m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 2
   m_YMotion: 2
   m_ZMotion: 2
@@ -1632,8 +1632,8 @@ ConfigurableJoint:
   m_TargetVelocity: {x: 0, y: 0, z: 0}
   m_XDrive:
     serializedVersion: 4
-    positionSpring: 10
-    positionDamper: 1000
+    positionSpring: 0
+    positionDamper: 0
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_YDrive:
@@ -1650,7 +1650,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_TargetRotation: {x: 0, y: 0, z: 0, w: 1}
   m_TargetAngularVelocity: {x: 0, y: 0, z: 0}
-  m_RotationDriveMode: 0
+  m_RotationDriveMode: 1
   m_AngularXDrive:
     serializedVersion: 4
     positionSpring: 0
@@ -1695,28 +1695,30 @@ MonoBehaviour:
   movingPart: {fileID: 0}
   driveJoint: {fileID: 0}
   axisNo: 1
-  _unitMagnification: 10
+  _unitMagnification: 1
   _actuatorType: 0
+  forwardDirection: 2
   _unitSetting: 0
   _motorResolution: 4194304
   _ballscrewLead: 5000
   _gearRatio: 1
   _speedLimit: 2000
   _inPosWidth: 10
-  _jogSpeedLimit: 2000
-  _jogAccelTime: 500
-  _jogdecelTime: 500
-  _hprRetryType: 0
+  _jogSpeedLimit: 200
+  _jogAccelTime: 1000
+  _jogdecelTime: 1000
+  _hprRetryType: 1
   _defaultHprDirection: 1
-  _hprHighSpeed: 2000
-  _hprCreepSpeed: 2000
+  _hprHighSpeed: 200
+  _hprCreepSpeed: 50
   _hprAccelTime: 1000
   _hprDecelTime: 1000
   _isServoOn: 0
   _currentState: 0
   _lastError: 0
+  _currentPositionMM: 0
   _currentPositionRaw: 0
-  _hprOffestRaw: 0
+  _currentVelocityMM: 0
   _currentSpeedRaw: 0
   positioningDataList:
   - stepNo: 1
