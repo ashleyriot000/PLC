@@ -24,6 +24,15 @@ public class ServoAmp : MonoBehaviour
         Off, Standby, Positioning, Jogging, Homing, Error
     }
 
+    public enum HPRState
+    {
+        Sleep = 0,
+        Search,
+        Retry,
+        Creep,
+        Completed
+    }
+
     /*
     1004,하드웨어 스트로크 상한 감지,   정방향 끝(FLS) 센서가 OFF됨 (선이 끊기거나 침범함),역회전(JOG)으로 이동하여 탈출 후 에러 리셋
     1005,하드웨어 스트로크 하한 감지,   역방향 끝(RLS) 센서가 OFF됨,정회전(JOG)으로 이동하여 탈출 후 에러 리셋
@@ -122,7 +131,7 @@ public class ServoAmp : MonoBehaviour
     private double _posTargetVelocityMM = 0d;       //지령 속도(m/Sec)
     private double _activeAccelTime = 0d;
     private double _activeDecelTime = 0d;
-    private int _homingSequenceStep = 0;
+    private int _currentHPRDirection = 0;
 
     private bool _isOnJogForward = false;
     private bool _isOnJogReverse = false;
@@ -130,6 +139,7 @@ public class ServoAmp : MonoBehaviour
     private bool _isOnFLS = false;
     private bool _isOnRLS = false;
     private bool _isOnDOG = false;
+    private bool _hprCompleted = false;
 
     private bool _inPosition = false;
     #endregion
@@ -141,7 +151,9 @@ public class ServoAmp : MonoBehaviour
     public bool IsError => _currentState == AxisState.Error || _lastError != MotionError.None;
     public bool IsBusy => _currentState != AxisState.Standby && _currentState != AxisState.Error && _lastError == MotionError.None;
     public bool InPosition => _inPosition;
+    public bool HPRCompleted => _hprCompleted;
     public short ErrorCode => (short)_lastError;
+
     public double RawToMeter(double rawValue) => rawValue * _unitMultiplier * 0.001d;
 
     public bool IsOnFLS
@@ -216,20 +228,14 @@ public class ServoAmp : MonoBehaviour
         _currentPositionRaw = MMToRaw(_currentPositionMM);
         _jogTargetVelocityMM = 0d;
         _posTargetVelocityMM = 0d;
-        SetupJointPhysics(20f);
+        SetupJointPhysics(0f);
     }    
 
     private void FixedUpdate()
     {
         if (!_isServoOn)
         {
-            // 1. 상태 업데이트
-            double prevPos = _internalPositionMM;
-            _internalPositionMM = GetPhysicalPositionMM();
-            _currentPositionMM = _internalPositionMM - _hprOffsetMM;
-            _currentPositionRaw = MMToRaw(_currentPositionMM);
-            _currentSpeedMM = Math.Abs(prevPos - _internalPositionMM) * 60d / Time.fixedDeltaTime;
-            _currentSpeedRaw = (int)_currentSpeedMM * 100;
+            UpdateRealPositionAndVelocity();
             return;
         }
 
@@ -246,6 +252,8 @@ public class ServoAmp : MonoBehaviour
         // 4. 동작 로직
         switch (_currentState)
         {
+            case AxisState.Standby:
+                break;
             case AxisState.Positioning:
                 ProcessPositioning();
                 break;
@@ -253,6 +261,7 @@ public class ServoAmp : MonoBehaviour
                 ProcessJog();
                 break;
             case AxisState.Homing:
+                ProcessHPR();
                 break;
             default:
                 break;
@@ -280,13 +289,14 @@ public class ServoAmp : MonoBehaviour
         {
             Debug.Log($"[Axis {axisNo}] Servo OFF");
             _currentState = AxisState.Off;
+            _hprCompleted = false;
             _hprOffsetMM = 0f;
             _internalPositionMM = GetPhysicalPositionMM();
             _currentPositionMM = _internalPositionMM - _hprOffsetMM;
             _currentPositionRaw = MMToRaw(_currentPositionMM);
             _jogTargetVelocityMM = 0d;
             _posTargetVelocityMM = 0d;
-            SetupJointPhysics(20f);
+            SetupJointPhysics(0f);
         }
     }
 
@@ -295,7 +305,7 @@ public class ServoAmp : MonoBehaviour
         JointDrive drive = new()
         {
             positionSpring = spring,
-            positionDamper = 2000f,
+            positionDamper = 1000f,
             maximumForce = float.MaxValue
         };
 
@@ -309,7 +319,16 @@ public class ServoAmp : MonoBehaviour
         }
     }
 
-
+    private void UpdateRealPositionAndVelocity()
+    {
+        // 1. 상태 업데이트
+        double prevPos = _internalPositionMM;
+        _internalPositionMM = GetPhysicalPositionMM();
+        _currentPositionMM = _internalPositionMM;
+        _currentPositionRaw = MMToRaw(_currentPositionMM);
+        _currentSpeedMM = Math.Abs(prevPos - _internalPositionMM) * 60d / Time.fixedDeltaTime;
+        _currentSpeedRaw = (int)_currentSpeedMM * 100;
+    }
     #endregion
 
     #region 6. Helper Functions
@@ -396,6 +415,7 @@ public class ServoAmp : MonoBehaviour
 
     public void ResetAxis()
     {
+        Debug.Log($"[Axis {axisNo}] Servo Reset!!");
         _currentState = AxisState.Standby;
         _lastError = MotionError.None;
     }
@@ -461,13 +481,13 @@ public class ServoAmp : MonoBehaviour
         else
             accelRate = (_speedLimit / 60d) / (_jogAccelTime * 0.001d);
 
-        _internalVelocityMM = MoveTowards(_internalVelocityMM, _jogTargetVelocityMM, accelRate * Time.fixedDeltaTime);       
+        _internalVelocityMM = MoveTowards(_internalVelocityMM, _jogTargetVelocityMM, accelRate * Time.fixedDeltaTime);
         _internalPositionMM += _internalVelocityMM * Time.fixedDeltaTime;
+        ApplyPhysicsTarget(_internalPositionMM);
         _currentPositionMM = _internalPositionMM - _hprOffsetMM;
         _currentPositionRaw = MMToRaw(_currentPositionMM);
         _currentSpeedMM = _internalVelocityMM * 60d;
         _currentSpeedRaw = (int)_currentSpeedMM * 100;
-        ApplyPhysicsTarget(_internalPositionMM);
 
         if((IsError || !_isOnJogForward && !_isOnJogReverse) && Approximately(Math.Abs(_internalVelocityMM), 0d, 0.0001d))
         {
@@ -475,6 +495,11 @@ public class ServoAmp : MonoBehaviour
                 _currentState = AxisState.Standby;
             else
                 _currentState = AxisState.Error;
+
+            _currentPositionMM = _internalPositionMM - _hprOffsetMM;
+            _currentPositionRaw = MMToRaw(_currentPositionMM);
+            _currentSpeedMM = _internalVelocityMM = 0d;
+            _currentSpeedRaw = (int)_currentSpeedMM * 100;
         }
     }
 
@@ -524,8 +549,8 @@ public class ServoAmp : MonoBehaviour
         _currentState = AxisState.Positioning;
         double scaledPos = data.posAddress * 0.001d;
         _commandPositionMM = (data.controlMethod == ControlMethodType.INC_Linear1)? 
-            _currentPositionMM + scaledPos : scaledPos;
-        Debug.Log($"[Axis {axisNo}] Start Pos No.{stepNo}::{data.controlMethod} ({data.posAddress} -> {_commandPositionMM:F3})");
+            _internalPositionMM + scaledPos : scaledPos + _hprOffsetMM;
+        Debug.Log($"[Axis {axisNo}] Start Pos No.{stepNo}::{data.controlMethod} ({data.posAddress} -> {_commandPositionMM - _hprOffsetMM:F3})");
 
         double scaledTargetSpeed = data.commandSpeed / 60d;
         _posTargetVelocityMM = _commandPositionMM > _currentPositionMM ? scaledTargetSpeed : -scaledTargetSpeed;
@@ -536,7 +561,7 @@ public class ServoAmp : MonoBehaviour
     public void ProcessPositioning()
     {
         double speedLimitSec = _speedLimit / 60d;
-        double distToEnd = Math.Abs(_commandPositionMM - _currentPositionMM);
+        double distToEnd = Math.Abs(_commandPositionMM - _internalPositionMM);
         double accelRate = speedLimitSec / _activeAccelTime;
         double decelRate = speedLimitSec / _activeDecelTime;
         double stoppingDist = _internalVelocityMM * _internalVelocityMM / (2 * decelRate);
@@ -554,12 +579,16 @@ public class ServoAmp : MonoBehaviour
         if (Approximately(Math.Abs(_internalVelocityMM), 0d, 0.0001d))
         {
             _internalPositionMM = _commandPositionMM;
+
             if (_lastError == MotionError.None)
                 _currentState = AxisState.Standby;
             else
                 _currentState = AxisState.Error;
 
-
+            _currentPositionMM = _internalPositionMM - _hprOffsetMM;
+            _currentPositionRaw = MMToRaw(_currentPositionMM);
+            _currentSpeedMM = _internalVelocityMM = 0d;
+            _currentSpeedRaw = (int)_currentSpeedMM * 100;
         }
         ApplyPhysicsTarget(_internalPositionMM);
     }
@@ -568,94 +597,115 @@ public class ServoAmp : MonoBehaviour
     {
         Debug.Log($"[Axis {axisNo}] Start Homing (9001)");
         _currentState = AxisState.Homing;
-        _homingSequenceStep = 0;
+        _currentHPRState = HPRState.Search;
+        _currentHPRDirection = _defaultHprDirection;
+    }
+    private HPRState _currentHPRState = HPRState.Sleep;
+    private void ProcessHPR()
+    {
+        switch (_currentHPRState)
+        {
+            case HPRState.Search:
+                SearchHPR();
+                break;
+            case HPRState.Retry:
+                RetryHPR();
+                break;
+            case HPRState.Creep:
+                CreepHPR();
+                break;
+        }
+        
+        ApplyPhysicsTarget(_internalPositionMM);
     }
 
-    //private void UpdateProfileLogic()
-    //{
-    //    double targetSpeedSec = _posTargetSpeed / 60d;
-    //    double speedLimitSec = (_speedLimit * _unitMultiplier) / 60d;
+    private void SearchHPR()
+    {
+        if (_isOnDOG)
+        {
+            _currentHPRState = HPRState.Creep;
+        }
 
-    //    if (_currentState == AxisState.Positioning)
-    //    {
-    //        double distToEnd = Math.Abs(_finalTargetPosMM - _commandPositionMM);
-    //        double decelRate = speedLimitSec / (Math.Max(_activeDecelTime, 1) / 1000d);
-    //        double stoppingDist = (_currentVelocityMM * _currentVelocityMM) / (2 * decelRate);
-    //        if (distToEnd <= stoppingDist) targetSpeedSec = 0;
-    //    }
+        if((_currentHPRDirection > 0 && _isOnFLS) || (_currentHPRDirection < 0 && _isOnRLS))
+        {
+            if(_hprRetryType == HomingType.DoNotRetry)
+            {
+                _lastError = _isOnFLS ? MotionError.HardwareStrokeFLS : MotionError.HardwareStrokeRLS;
+                _currentState = AxisState.Error;
+                return;
+            }
 
-    //    double accelStep = (speedLimitSec / (Math.Max(_activeAccelTime, 1) / 1000d)) * Time.fixedDeltaTime;
-    //    double decelStep = (speedLimitSec / (Math.Max(_activeDecelTime, 1) / 1000d)) * Time.fixedDeltaTime;
-    //    double maxChange = (Math.Abs(targetSpeedSec) > Math.Abs(_currentVelocityMM)) ? accelStep : decelStep;
+            _currentHPRState = HPRState.Retry;
+            _currentHPRDirection = -_currentHPRDirection;
+            return;
+        }
+        
+        double accelRate = (_speedLimit / 60d) / (_hprAccelTime * 0.001d);
+        double targetVelocity = (_hprHighSpeed / 60d) * _currentHPRDirection;
+        _internalVelocityMM = MoveTowards(_internalVelocityMM, targetVelocity, accelRate * Time.fixedDeltaTime);
+        _internalPositionMM += _internalVelocityMM * Time.fixedDeltaTime;
+        _currentPositionMM = _internalPositionMM - _hprOffsetMM;
+        _currentPositionRaw = MMToRaw(_currentPositionMM);
+        _currentSpeedMM = _internalVelocityMM * 60d;
+        _currentSpeedRaw = (int)_currentSpeedMM * 100;
+    }
 
-    //    _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, (float)targetSpeedSec, (float)maxChange);
+    private void RetryHPR()
+    {
+        if (_isOnDOG)
+        {
+            _currentHPRState = HPRState.Creep;
+            _currentHPRDirection = _defaultHprDirection;
+            return;
+        }
 
-    //    double inPosMM = _inPosWidth * _unitMultiplier;
-    //    if (_currentState == AxisState.Positioning &&
-    //        Math.Abs(_finalTargetPosMM - _commandPositionMM) < inPosMM &&
-    //        Math.Abs(_currentVelocityMM) < 0.01d)
-    //    {
-    //        _commandPositionMM = _finalTargetPosMM;
-    //        _currentVelocityMM = 0;
-    //        _currentState = AxisState.Standby;
-    //    }
-    //    else
-    //    {
-    //        _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
-    //    }
-    //    ApplyPhysicsTarget(_commandPositionMM);
-    //}
+        if ((_currentHPRDirection > 0 && _isOnFLS) || (_currentHPRDirection < 0 && _isOnRLS))
+        {           
+            _currentHPRDirection = -_currentHPRDirection;
+        }
 
-    //private void UpdateHomingLogic()
-    //{
-    //    double highSpeed = ToMeterPerSeconds(_hprHighSpeed);
-    //    double creepSpeed = ToMeterPerSeconds(_hprCreepSpeed);
-    //    int dir = _defaultHprDirection;
+        double accelRate = (_speedLimit / 60d) / (_hprAccelTime * 0.001d);
+        double targetVelocity = (_hprHighSpeed / 60d) * _currentHPRDirection;
+        _internalVelocityMM = MoveTowards(_internalVelocityMM, targetVelocity, accelRate * Time.fixedDeltaTime);
+        _internalPositionMM += _internalVelocityMM * Time.fixedDeltaTime;
+        _currentPositionMM = _internalPositionMM - _hprOffsetMM;
+        _currentPositionRaw = MMToRaw(_currentPositionMM);
+        _currentSpeedMM = _internalVelocityMM * 60d;
+        _currentSpeedRaw = (int)_currentSpeedMM * 100;
+    }
 
-    //    //switch (_homingSequenceStep)
-    //    //{
-    //    //    case 0:
-    //    //        _posTargetSpeed = highSpeed * dir;
-    //    //        UpdateVelocityAndPos(highSpeed * dir, _hprAccelTime);
-    //    //        if (_isOnDOG) _homingSequenceStep = 1;
-    //    //        break;
-    //    //    case 1:
-    //    //        _posTargetSpeed = creepSpeed * dir;
-    //    //        UpdateVelocityAndPos(creepSpeed * dir, _hprDecelTime);
-    //    //        if (!_isOnDOG) _homingSequenceStep = 2;
-    //    //        break;
-    //    //    case 2:
-    //    //        _posTargetSpeed = 0;
-    //    //        double limitSec = ToMeterPerSeconds(_speedLimit);
-    //    //        double stopDecel = (limitSec / 0.05d) * Time.fixedDeltaTime;
-    //    //        _currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, 0f, (float)stopDecel);
-    //    //        _commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
-    //    //        if (Math.Abs(_currentVelocityMM) < 0.01d)
-    //    //        {
-    //    //            _currentVelocityMM = 0; _commandPositionMM = 0; ApplyPhysicsTarget(0);
-    //    //            _currentState = AxisState.Standby;
-    //    //        }
-    //    //        break;
-    //    //}
-    //    //ApplyPhysicsTarget(_commandPositionMM);
-    //}
+    private void CreepHPR()
+    {
+        if(!_isOnDOG)
+        {
+            _hprCompleted = true;
+            _currentState = AxisState.Standby;
+            _currentHPRState = HPRState.Completed;
+            _hprOffsetMM = _internalPositionMM;
+            _currentPositionMM = _internalPositionMM - _hprOffsetMM;
+            _currentPositionRaw = MMToRaw(_currentPositionMM);
+            _currentSpeedMM = _internalVelocityMM = 0d;
+            _currentSpeedRaw = (int)_currentSpeedMM * 100;
+            return;
+        }
 
-    //private void UpdateVelocityAndPos(double targetVelSec, double timeMs)
-    //{
-    //    //double limitSec = ToMeterPerSeconds(_speedLimit);
-    //    //double step = (limitSec / (timeMs / 1000d)) * Time.fixedDeltaTime;
-    //    //_currentVelocityMM = Mathf.MoveTowards((float)_currentVelocityMM, (float)targetVelSec, (float)step);
-    //    //_commandPositionMM += _currentVelocityMM * Time.fixedDeltaTime;
-    //}
+        double decelRate = (_speedLimit / 60d) / (_hprDecelTime * 0.001d);
+        double targetVelocity = (_hprHighSpeed / 60d) * _currentHPRDirection;
 
-    
+        _internalVelocityMM = MoveTowards(_internalVelocityMM, targetVelocity, decelRate * Time.fixedDeltaTime);
+        _internalPositionMM += _internalVelocityMM * Time.fixedDeltaTime;
+        _currentPositionMM = _internalPositionMM - _hprOffsetMM;
+        _currentPositionRaw = MMToRaw(_currentPositionMM);
+        _currentSpeedMM = _internalVelocityMM * 60d;
+        _currentSpeedRaw = (int)_currentSpeedMM * 100;
+    }
+
     #endregion
-    public void RaiseError(MotionError error) 
-    { 
+    public void RaiseError(MotionError error)
+    {
         _lastError = error;
         Debug.LogWarning($"[Axis {axisNo}] Error 발생 => {error}(Code: {ErrorCode})");
     }
-
 
     // [Unity Editor Magic] OnValidate: 인스펙터 값이 변경될 때 호출됨
 #if UNITY_EDITOR
