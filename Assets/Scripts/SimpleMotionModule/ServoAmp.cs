@@ -57,6 +57,7 @@ public class ServoAmp : MonoBehaviour
         [InspectorName("하드웨어 스트로크 하한 감지")]  HardwareStrokeRLS        = 1005,
         [InspectorName("운행중 지령 시작")]             StartDuringOperation     = 2001,
         [InspectorName("운행중 지령 시작(JOG)")]        StartDuringOperationJOG  = 2005,
+        [InspectorName("원점 복귀 요청 ON")]          OprRequestON = 2024,
         [InspectorName("소프트웨어 제한범위 초과")]     SoftwareStrokeLimit      = 5001,
     }
     [Serializable]
@@ -239,9 +240,6 @@ public class ServoAmp : MonoBehaviour
             return;
         }
 
-        // 2. 센서 체크
-        CheckHardwareLimits();
-
         // 3. 에러 시 정지
         if (_currentState == AxisState.Error)
         {
@@ -403,16 +401,6 @@ public class ServoAmp : MonoBehaviour
     }
     #endregion
 
-    #region 7. Motion Logic
-    private void CheckHardwareLimits()
-    {
-        if (_currentState == AxisState.Homing && _hprRetryType == HomingType.Retry)
-            return;
-
-        if (_currentSpeedMM > 0 && _isOnFLS) RaiseError(MotionError.HardwareStrokeFLS);
-        if (_currentSpeedMM < 0 && _isOnRLS) RaiseError(MotionError.HardwareStrokeRLS);
-    }
-
     public void ResetAxis()
     {
         Debug.Log($"[Axis {axisNo}] Servo Reset!!");
@@ -525,9 +513,31 @@ public class ServoAmp : MonoBehaviour
             return;
         }
 
+        //원점 복귀
         if (stepNo == 9001)
         {
             StartHPR();
+            return;
+        }
+
+
+        //고속 원점 복귀 : Creep 속도로 변화하지 않고 원점으로 바로 돌아감. 원점을 이미 알고 있는 상태에서 사용해야함.
+        if (stepNo == 9002)
+        {
+            if(!_hprCompleted)
+            {
+                RaiseError(MotionError.OprRequestON);
+                return;
+            }
+
+            Debug.Log($"[Axis {axisNo}] Start Hight speed HPR");
+            _currentState = AxisState.Positioning;
+            _commandPositionMM = _hprOffsetMM;
+
+            double targetSpeed = _hprHighSpeed / 60d;
+            _posTargetVelocityMM = _commandPositionMM > _currentPositionMM ? targetSpeed : -targetSpeed;
+            _activeAccelTime = _hprAccelTime * 0.001d;
+            _activeDecelTime = _hprDecelTime * 0.001d;
             return;
         }
 
@@ -576,7 +586,7 @@ public class ServoAmp : MonoBehaviour
         _currentSpeedMM = _internalVelocityMM * 60d;
         _currentSpeedRaw = (int)_currentSpeedMM * 100;
 
-        if (Approximately(Math.Abs(_internalVelocityMM), 0d, 0.0001d))
+        if (Approximately(Math.Abs(_internalVelocityMM), 0d, _inPosWidth * 1000d))
         {
             _internalPositionMM = _commandPositionMM;
 
@@ -660,7 +670,7 @@ public class ServoAmp : MonoBehaviour
         }
 
         if ((_currentHPRDirection > 0 && _isOnFLS) || (_currentHPRDirection < 0 && _isOnRLS))
-        {           
+        {
             _currentHPRDirection = -_currentHPRDirection;
         }
 
@@ -700,7 +710,6 @@ public class ServoAmp : MonoBehaviour
         _currentSpeedRaw = (int)_currentSpeedMM * 100;
     }
 
-    #endregion
     public void RaiseError(MotionError error)
     {
         _lastError = error;

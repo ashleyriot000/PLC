@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 public class SimpleMotionModule : MXObject
@@ -28,10 +29,10 @@ public class SimpleMotionModule : MXObject
     public enum AxisFeedback : ushort
     {
         None = 0,        
-        READY_Axis1 = 1,
-        READY_Axis2 = 1 << 1,
-        READY_Axis3 = 1 << 2,
-        READY_Axis4 = 1 << 3,
+        InAction_Axis1 = 1,
+        InAction_Axis2 = 1 << 1,
+        InAction_Axis3 = 1 << 2,
+        InAction_Axis4 = 1 << 3,
         InPosition_Axis1 = 1 << 4,
         InPosition_Axis2 = 1 << 5,
         InPosition_Axis3 = 1 << 6,
@@ -79,7 +80,7 @@ public class SimpleMotionModule : MXObject
 
     private void Awake()
     {
-        int rawAddress = System.Convert.ToInt32(startIO_Hex, 16);
+        int rawAddress = Convert.ToInt32(startIO_Hex, 16);
         _startIO_Slot = rawAddress / 16;
 
         _ySystemCmdAddr = "K4Y" + startIO_Hex;
@@ -193,7 +194,6 @@ public class SimpleMotionModule : MXObject
             {
                 _isCommandExecuted[i] = false;
             }
-            
 
             int resetNo = data[offset + 2];
             if (resetNo > 0)
@@ -207,6 +207,7 @@ public class SimpleMotionModule : MXObject
 
     private void PrepareWriteData()
     {
+        
         for (int i = 0; i < axes.Length; i++)
         {
             if (axes[i] == null) continue;
@@ -218,10 +219,10 @@ public class SimpleMotionModule : MXObject
             _writeBufferCache[offset + 1] = (short)((currentPulse >> 16) & 0xFFFF);
             _writeBufferCache[offset + 6] = axes[i].ErrorCode;
 
-            if (axes[i].IsReady)
-                AddAxisFeedback((int)AxisFeedback.READY_Axis1 << i);
+            if (_isCommandExecuted[i])
+                AddAxisFeedback((int)AxisFeedback.InAction_Axis1 << i);
             else
-                RemoveAxisFeedback(1 << i);
+                RemoveAxisFeedback((int)AxisFeedback.InAction_Axis1 << i);
 
             if (axes[i].IsError)
                 AddSystemFeedback((int)SystemFeedback.ERROR_Axis1 << i);
@@ -238,7 +239,7 @@ public class SimpleMotionModule : MXObject
             else
                 RemoveAxisFeedback((int)AxisFeedback.InPosition_Axis1 << i);
         }
-
+        _xSystemFeedback |= SystemFeedback.SyncFLAG;
         MXRequester.Get.AddSetDeviceRequest(_xSystemFeedbackAddr, (short)_xSystemFeedback, null);
         MXRequester.Get.AddSetDeviceRequest(_xAxisFeedbackAddr, (short)_xAxisFeedback, null);
         MXRequester.Get.AddBufferWrite(_startIO_Slot, monitorAreaStartAddr, _writeBufferCache, OnWriteCompleted);
@@ -266,5 +267,20 @@ public class SimpleMotionModule : MXObject
     public void RemoveAxisFeedback(int flags)
     {
         _xAxisFeedback &= ~(AxisFeedback)flags;
+    }
+
+    public void SavePositioningDatas()
+    {
+
+    }
+
+    public void LoadPositioningDatas()
+    {
+
+    }
+
+    public void AddPositioningData()
+    {
+
     }
 }
