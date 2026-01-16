@@ -39,6 +39,19 @@ public class SimpleMotionModule : MXObject
         InPosition_Axis4 = 1 << 7,
     }
 
+    [System.Flags]
+    public enum AxisStatus : ushort
+    {
+        None =0,
+        SpeedControling                 = 1,
+        SpeedPositionTransition       = 1 << 1,
+        CommandInPositionFlag      = 1 << 2,
+        NeedHpr                            = 1 << 3,
+        CompletedHPR                    = 1 << 4,
+        PositionSpeedTransition       = 1 << 5
+
+    }
+
     #region Settings
     [Header("Network Settings")]
     [Tooltip("모듈의 선두 I/O 번호 (Hex String, 예: 00, 20, 50)")]
@@ -74,6 +87,7 @@ public class SimpleMotionModule : MXObject
 
     private SystemFeedback _xSystemFeedback = SystemFeedback.SyncFLAG;
     private AxisFeedback _xAxisFeedback = AxisFeedback.None;
+    private AxisStatus _axisStatus = AxisStatus.NeedHpr;
 
     private bool[] _isCommandExecuted;
     #endregion
@@ -219,6 +233,16 @@ public class SimpleMotionModule : MXObject
             _writeBufferCache[offset + 1] = (short)((currentPulse >> 16) & 0xFFFF);
             _writeBufferCache[offset + 6] = axes[i].ErrorCode;
 
+            if (!axes[i].HPRCompleted)
+                AddAxisStatus((int)AxisStatus.NeedHpr);
+            else
+                RemoveAxisStatus((int)AxisStatus.NeedHpr);
+
+            if (axes[i].HPRCompleted)
+                AddAxisStatus((int)AxisStatus.CompletedHPR);
+            else
+                RemoveAxisStatus((int)AxisStatus.CompletedHPR);
+
             if (_isCommandExecuted[i])
                 AddAxisFeedback((int)AxisFeedback.InAction_Axis1 << i);
             else
@@ -251,22 +275,31 @@ public class SimpleMotionModule : MXObject
     }
     #endregion
 
-    public void AddSystemFeedback(int flags)
+    private void AddSystemFeedback(int flags)
     {
         _xSystemFeedback |= (SystemFeedback)flags;
     }
-    public void RemoveSystemFeedback(int flags)
+    private void RemoveSystemFeedback(int flags)
     {
         _xSystemFeedback &= ~(SystemFeedback)flags;
     }
 
-    public void AddAxisFeedback(int flags)
+    private void AddAxisFeedback(int flags)
     {
         _xAxisFeedback |= (AxisFeedback)flags;
     }
-    public void RemoveAxisFeedback(int flags)
+    private void RemoveAxisFeedback(int flags)
     {
         _xAxisFeedback &= ~(AxisFeedback)flags;
+    }
+
+    private void AddAxisStatus(int flags)
+    {
+        _axisStatus |= (AxisStatus)flags;
+    }
+    private void RemoveAxisStatus(int flags)
+    {
+        _axisStatus &= ~(AxisStatus)flags;
     }
 
     public void SavePositioningDatas()

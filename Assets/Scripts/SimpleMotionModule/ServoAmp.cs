@@ -700,7 +700,7 @@ public class ServoAmp : MonoBehaviour
         }
 
         double decelRate = (_speedLimit / 60d) / (_hprDecelTime * 0.001d);
-        double targetVelocity = (_hprHighSpeed / 60d) * _currentHPRDirection;
+        double targetVelocity = (_hprCreepSpeed / 60d) * _currentHPRDirection;
 
         _internalVelocityMM = MoveTowards(_internalVelocityMM, targetVelocity, decelRate * Time.fixedDeltaTime);
         _internalPositionMM += _internalVelocityMM * Time.fixedDeltaTime;
