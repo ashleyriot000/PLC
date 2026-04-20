@@ -109,6 +109,7 @@ public class ServoAmp : MonoBehaviour
     [SerializeField][Label("원점복귀 정밀 속도(mm/Min)")] private double _hprCreepSpeed = 0.01d;           //원점 복귀 정밀 속도(mm/분) -> m/초(/60000)
     [SerializeField][Label("원점복귀 가속 시간(ms)")] private double _hprAccelTime = 1000d;                //원점 복귀 가속 시간(ms) -> 초(/1000)
     [SerializeField][Label("원점복귀 감속 시간(ms)")] private double _hprDecelTime = 1000d;                //원점 복귀 감속 시간(ms) -> 초(/1000)
+    [SerializeField][Label("원점 위치(umdegree)")] private double _hpAddress = 0d;
     #endregion    
 
     #region 2. State
@@ -691,7 +692,7 @@ public class ServoAmp : MonoBehaviour
             _hprCompleted = true;
             _currentState = AxisState.Standby;
             _currentHPRState = HPRState.Completed;
-            _hprOffsetMM = _internalPositionMM;
+            _hprOffsetMM = _internalPositionMM - _hpAddress;
             _currentPositionMM = _internalPositionMM - _hprOffsetMM;
             _currentPositionRaw = MMToRaw(_currentPositionMM);
             _currentSpeedMM = _internalVelocityMM = 0d;

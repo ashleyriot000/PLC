@@ -216,6 +216,7 @@ public sealed class MXInterface : IDisposable
         catch (COMException e)
         {
             Debug.LogError($"MX Component 객체가 생성에 실패했습니다.\n{e.Message}");
+            _worker = null;
             return;
         }
 
@@ -223,7 +224,11 @@ public sealed class MXInterface : IDisposable
         if (ret == 0)
             Debug.Log("시뮬레이터와 성공적으로 연결되었습니다.");
         else
+        {
             Debug.LogError($"시뮬레이터와의 연결에 실패하였습니다.오류코드(0x{ret:X8})");
+            _worker = null;
+            return;
+        }        
 
         _isRunning = true;
 
@@ -283,14 +288,15 @@ public sealed class MXInterface : IDisposable
             // 버퍼 메모리 읽기 (ReadBuffer)
             while (_bufferReadQueue.TryDequeue(out BufferReadRequest request))
             {
-
                 // ReadBuffer(StartIO, Address, Size, out Data)
                 //Debug.Log($"ReadBuffer => {request.startIO}, {request.address}, {request.size}");
                 ret = _communicator.ReadBuffer(request.startIO, request.address, request.size, out request.readData[0]);
 
-                if (ret != 0) Debug.LogError($"Buffer Read 실패 (IO:{request.startIO:X}, Addr:{request.address}). 오류(0x{ret:X8})");
+                if (ret != 0) 
+                    Debug.LogError($"Buffer Read 실패 (IO:{request.startIO:X}, Addr:{request.address}). 오류(0x{ret:X8})");
 
                 if (request.callback == null) continue;
+
                 MXRequester.Get.OnReceivedBufferRead(request);
             }
 
@@ -331,3 +337,4 @@ public sealed class MXInterface : IDisposable
         }
     }
 }
+
